@@ -98,7 +98,7 @@ export const Productos = () => {
                 {
                     isOpen && (
                         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto mb-60">
+                            <div className="bg-white p-8 rounded-lg shadow-lg w-1/3 mx-auto mb-60">
                                 <h2 className="text-xl font-semibold mb-10">Crear Producto</h2>
                                 {mostrarAlertaExitosa && (
                                     <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
@@ -167,13 +167,13 @@ export const Productos = () => {
                 <div className="flex flex-wrap gap-5 justify-around items-center mb-4 w-full">
                     <p className="text-xl font-medium">Productos</p>
                     <div className="flex gap-5 justify-around flex-wrap items-center">
-                        <form class="flex items-center">
-                            <label for="simple-search" class="sr-only">Buscar</label>
-                            <div class="relative w-full">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                        <form className="flex items-center">
+                            <label htmlFor="simple-search" className="sr-only">Buscar</label>
+                            <div className="relative w-full">
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <svg aria-hidden="true" className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
                                 </div>
-                                <input type="text" id="simple-search" class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 blockw-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" required />
+                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 blockw-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" required />
                             </div>
                         </form>
 
@@ -191,7 +191,7 @@ export const Productos = () => {
                 <div className='flex flex-wrap justify-center w-full'>
                     {
                         productos.map(producto => (
-                            <CardsProductos update={setCardUpdate} key={producto.IdProducto} id={producto.IdProducto} nombre={producto.Nombre} descripcion={producto.Descripcion} stock={producto.Stock} />
+                            <CardsProductos key={producto.IdProducto} update={setCardUpdate} id={producto.IdProducto} nombre={producto.Nombre} descripcion={producto.Descripcion} stock={producto.Stock} />
                         ))
                     }
                 </div>

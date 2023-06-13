@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-export const Login = () => {
+export const Login = ({setUser}) => {
 
     const navigate = useNavigate();
     const [nombreUsuario, setNombreUsuario] = useState('');
@@ -33,8 +33,11 @@ export const Login = () => {
             });
 
             const data = await response.json();
+            const usuario = {nombreUsuario, contrasena}
 
             if (response.ok) {
+                console.log(usuario);
+                setUser(usuario)
                 setMensaje(data.mensaje);
                 setMostrarAlerta(true);
                 setTimeout(() => {
@@ -50,6 +53,7 @@ export const Login = () => {
             setMensaje('Error de conexiòn');
         }
     };
+
 
     return (
         <>
@@ -135,4 +139,8 @@ export const Login = () => {
             </div>
         </>
     )
+}
+
+Login.defaultProps = {
+    nombre: "BENTA",
 }

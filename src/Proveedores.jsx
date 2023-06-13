@@ -116,7 +116,7 @@ export const Proveedores = () => {
                                 )}
                                 <form onSubmit={handleFormSubmit}>
                                     <div className="mb-4">
-                                        <label className="block text-gray-700 font-bold mb-2" htmlFor="name">Nombre Proveedor</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre Proveedor</label>
                                         <input
                                             type="text"
                                             id="name"
@@ -126,7 +126,7 @@ export const Proveedores = () => {
                                         />
                                     </div>
                                     <div className="mb-7">
-                                        <label className="block text-gray-700 font-bold mb-2" htmlFor="email">Telefono Proveedor</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono Proveedor</label>
                                         <input
                                             type="text"
                                             id="email"
