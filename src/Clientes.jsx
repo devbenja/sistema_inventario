@@ -177,7 +177,7 @@ export const Clientes = () => {
                         </form>
 
                         <button
-                            className="ml-5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className=" ml-5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onClick={openModal}
                         >
                             Crear Cliente
@@ -187,13 +187,21 @@ export const Clientes = () => {
             </div>
 
             <div className='container px-5 py-10 mx-auto'>
-                <div className='flex flex-wrap justify-center w-full'>
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" id="table">
+                    <thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center'>
+                        <tr>
+                            <th scope="col" className="px-6 py-3">Codigo</th>
+                            <th scope="col" className="px-6 py-3">Nombre</th>
+                            <th scope="col" className="px-6 py-3">Telefono</th>
+                            <th scope="col" className="px-6 py-3">Acciones</th>
+                        </tr>
+                    </thead>
                     {
                         clientes.map(cliente => (
                             <CardsCliente key={cliente.IdCliente} setIsOpen={setIsOpen} setCardUpdate={setCardUpdate}  id={cliente.IdCliente} nombre={cliente.NombreCliente} telefono={cliente.TelefonoCliente} />
                         ))
                     }
-                </div>
+                </table>
             </div>
         </div>
     )

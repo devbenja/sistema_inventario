@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './Login';
 import { Home } from './Home';
@@ -10,22 +10,11 @@ import { Compras } from './Compras';
 import { Ventas } from './Ventas';
 
 export const App = () => {
-
-  const [user, setUser] = useState({});
-
-  if(!user){
-    console.log("vacio");
-  }
-  else{
-    console.log(user)
-  }
-
   return (
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login setUser={setUser} />} />
-          <Route path="/Login" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="*" element={<>Not found</>} />
           <Route path="/Home" exact element={<Home />} />
           <Route path="/Inicio" element={<Navigate to="/Home" />} />

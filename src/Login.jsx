@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-export const Login = ({setUser}) => {
+export const Login = () => {
 
     const navigate = useNavigate();
     const [nombreUsuario, setNombreUsuario] = useState('');
@@ -37,7 +37,6 @@ export const Login = ({setUser}) => {
 
             if (response.ok) {
                 console.log(usuario);
-                setUser(usuario)
                 setMensaje(data.mensaje);
                 setMostrarAlerta(true);
                 setTimeout(() => {
