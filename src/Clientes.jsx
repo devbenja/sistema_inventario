@@ -6,6 +6,8 @@ export const Clientes = () => {
 
     const [nombreCliente, setNombreCliente] = useState('');
     const [telefonoCliente, setTelefonoCliente] = useState('');
+    const [correoCliente, setCorreoCliente] = useState('');
+    const [direccionCliente, setDireccionCliente] = useState('');
     const [clientes, setClientes] = useState([0]);
     const [isOpen, setIsOpen] = useState(false);
     const [mensajeExitoso, setMensajeExitoso] = useState('');
@@ -33,6 +35,16 @@ export const Clientes = () => {
         setTelefonoCliente(event.target.value);
     };
 
+    const handleCorreoClienteChange = (event) => {
+        setCorreoCliente(event.target.value);
+    };
+
+    const handleDireccionClienteChange = (event) => {
+        setDireccionCliente(event.target.value);
+    };
+
+
+
     // Esta funcion manda los datos en la peticion post
     const handleFormSubmit = async (event) => {
         event.preventDefault();
@@ -43,7 +55,7 @@ export const Clientes = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ nombreCliente, telefonoCliente })
+                body: JSON.stringify({ nombreCliente, telefonoCliente, correoCliente, direccionCliente })
             });
 
             var data = await response.json();
@@ -54,6 +66,8 @@ export const Clientes = () => {
                 // Limpiar los campos de entrada después de crear el usuario
                 setNombreCliente('');
                 setTelefonoCliente('');
+                setCorreoCliente('');
+                setDireccionCliente('');
                 setMensajeError('');
                 setMostrarAlertaError(false);
 
@@ -121,7 +135,7 @@ export const Clientes = () => {
                                 )}
                                 <form onSubmit={handleFormSubmit}>
                                     <div className="mb-4">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre Cliente</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre</label>
                                         <input
                                             type="text"
                                             id="name"
@@ -131,12 +145,32 @@ export const Clientes = () => {
                                         />
                                     </div>
                                     <div className="mb-7">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono Cliente</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono</label>
                                         <input
                                             type="text"
                                             id="email"
                                             value={telefonoCliente}
                                             onChange={handleTelefonoClienteChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-7">
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Correo</label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            value={correoCliente}
+                                            onChange={handleCorreoClienteChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-7">
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Direccion</label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            value={direccionCliente}
+                                            onChange={handleDireccionClienteChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
@@ -186,19 +220,28 @@ export const Clientes = () => {
                 </div>
             </div>
 
-            <div className='container px-5 py-10 mx-auto'>
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400" id="table">
+            <div className='container px-5 py-10 mx-auto overflow-x-auto'>
+                <table className=" w-full text-sm text-left text-gray-500 dark:text-gray-400" id="table">
                     <thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center'>
                         <tr>
                             <th scope="col" className="px-6 py-3">Codigo</th>
                             <th scope="col" className="px-6 py-3">Nombre</th>
                             <th scope="col" className="px-6 py-3">Telefono</th>
+                            <th scope="col" className="px-6 py-3">Correo</th>
+                            <th scope="col" className="px-6 py-3">Direccion</th>
                             <th scope="col" className="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
                     {
                         clientes.map(cliente => (
-                            <CardsCliente key={cliente.IdCliente} setIsOpen={setIsOpen} setCardUpdate={setCardUpdate}  id={cliente.IdCliente} nombre={cliente.NombreCliente} telefono={cliente.TelefonoCliente} />
+                            <CardsCliente 
+                                key={cliente.IdCliente} 
+                                setCardUpdate={setCardUpdate}  
+                                id={cliente.IdCliente} nombre={cliente.NombreCliente} 
+                                telefono={cliente.TelefonoCliente} 
+                                correo={cliente.CorreoCliente} 
+                                direccion={cliente.DireccionCliente}
+                            />
                         ))
                     }
                 </table>

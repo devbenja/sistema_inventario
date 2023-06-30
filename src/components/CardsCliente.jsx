@@ -5,7 +5,7 @@ import { IoMdTrash } from 'react-icons/io';
 import { BiEdit } from "react-icons/bi";
 
 
-export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
+export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardUpdate }) => {
 
     const [isOpen, setIsOpen] = useState(false);
     const [mensajeExitoso, setMensajeExitoso] = useState('');
@@ -26,11 +26,8 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
 
 
     const handleSubmit = async (event) => {
-
         event.preventDefault();
-
         try {
-
             // Realizar la solicitud de actualización al backend utilizando fetch
             const response = await fetch(
                 `http://localhost:5000/api/ActualizarClientes/${id}`,
@@ -41,7 +38,6 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
                     },
                     body: JSON.stringify({ nombreCliente, telefonoCliente }),
                 }
-
             );
 
             if (response.ok) {
@@ -89,7 +85,7 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
     };
 
 
-
+    // Funcion para eliminar cliente
     const handleSubmitDelete = async () => {
         try {
             const response = await fetch('http://localhost:5000/api/DeleteCliente', {
@@ -98,7 +94,7 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
                 body: JSON.stringify({ id })
             });
 
-            var data = await response.json();
+            const data = await response.json();
 
             if (response.ok) {
                 Swal.fire('Cliente Eliminado', `El cliente ${nombre}  fue eliminado`, 'success');
@@ -130,8 +126,24 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
     };
 
     return (
-
         <tbody>
+            <tr>
+                <td className="border px-6 py-4 text-center">{id}</td>
+                <td className="border px-6 py-4">{nombre}</td>
+                <td className="border px-6 py-4">{telefono}</td>
+                <td className="border px-6 py-4">{direccion}</td>
+                <td className="border px-6 py-4">{correo}</td>
+                <td className="border px-6 py-4 flex items-center justify-center">
+                    <button onClick={mostrarSweetAlert} className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <IoMdTrash className='w-15' />
+                        Eliminar
+                    </button>
+                    <button onClick={openModal} className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <BiEdit className='w-15' />
+                        Editar
+                    </button>
+                </td>
+            </tr>
             {
                 isOpen && (
                     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
@@ -196,20 +208,6 @@ export const CardsCliente = ({ id, nombre, telefono, setCardUpdate }) => {
 
                 )
             }
-            <tr>
-                <td className="border px-6 py-4 text-center">{id}</td>
-                <td className="border px-6 py-4">{nombre}</td>
-                <td className="border px-6 py-4">{telefono}</td>
-                <td className="border px-6 py-4 text-center">
-                    <button onClick={mostrarSweetAlert} className="text-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <IoMdTrash className='w-7' />
-                    </button>
-                    <button onClick={openModal} className="ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <BiEdit className='w-7' />
-                    </button>
-                </td>
-            </tr>
         </tbody>
-
     )
 }
