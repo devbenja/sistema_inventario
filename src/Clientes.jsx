@@ -113,7 +113,7 @@ export const Clientes = () => {
                 {
                     isOpen && (
                         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto mb-60">
+                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto">
                                 <h2 className="text-xl font-semibold mb-10">Crear Cliente</h2>
                                 {mostrarAlertaExitosa && (
                                     <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">

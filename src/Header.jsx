@@ -36,12 +36,12 @@ export const Header = () => {
                     </div>
                     <div className="hidden md:flex">
 
-                        <Link to="/Create" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Crear Usuarios</Link>
-                        <Link to="/Compras" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Compras</Link>
-                        <Link to="/Proveedores" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Proveedores</Link>
-                        <Link to="/Clientes" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Clientes</Link>
-                        <Link to="/Productos" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Productos</Link>
+                        <Link to="/Create" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"> 👽 Usuarios</Link>                  
+                        <Link to="/Proveedores" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"> 👤 Proveedores</Link>
+                        <Link to="/Clientes" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"> 👥 Clientes</Link>
+                        <Link to="/Productos" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"> 💎 Productos</Link>
                         <Link to="/Ventas" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Ventas</Link>
+                        <Link to="/Compras" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md">Compras</Link>
 
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Header } from './Header'
 import { CardsProveedores } from './components/CardsProveedores';
 
@@ -6,12 +6,17 @@ export const Proveedores = () => {
 
     const [nombreProveedor, setNombreProveedor] = useState('');
     const [telefonoProveedor, setTelefonoProveedor] = useState('');
+    const [direccionProveedor, setDireccionProveedor] = useState('');
+    const [correoProveedor, setCorreoProveedor] = useState('');
+    const [pais, setPaisProveedor] = useState('');
     const [proveedores, setProveedores] = useState([0]);
     const [mensajeExitoso, setMensajeExitoso] = useState('');
     const [mensajeError, setMensajeError] = useState('');
     const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
     const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [cardUpdate, setCardUpdate] = useState(false);
+
 
     //Abrir el modal
     const openModal = () => {
@@ -23,13 +28,26 @@ export const Proveedores = () => {
         setIsOpen(false);
     };
 
-    const handleNombreClienteChange = (event) => {
+    const handleNombreProveedorChange = (event) => {
         setNombreProveedor(event.target.value);
     };
 
-    const handleTelefonoClienteChange = (event) => {
+    const handleTelefonoProveedorChange = (event) => {
         setTelefonoProveedor(event.target.value);
     };
+
+    const handleDireccionProveedorChange = (event) => {
+        setDireccionProveedor(event.target.value);
+    };
+
+    const handleCorreoProveedorChange = (event) => {
+        setCorreoProveedor(event.target.value);
+    };
+
+    const handlePaisProveedorChange = (event) => {
+        setPaisProveedor(event.target.value);
+    };
+
 
     // Esta funcion manda los datos en la peticion post
     const handleFormSubmit = async (event) => {
@@ -41,7 +59,7 @@ export const Proveedores = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ nombreProveedor, telefonoProveedor })
+                body: JSON.stringify({ nombreProveedor, telefonoProveedor, direccionProveedor, correoProveedor, pais })
             });
 
             var data = await response.json();
@@ -52,6 +70,9 @@ export const Proveedores = () => {
                 // Limpiar los campos de entrada después de crear el usuario
                 setNombreProveedor('');
                 setTelefonoProveedor('');
+                setDireccionProveedor('');
+                setCorreoProveedor('');
+                setPaisProveedor('');
                 setMensajeError('');
                 setMostrarAlertaError(false);
 
@@ -72,6 +93,8 @@ export const Proveedores = () => {
             setMensajeError('Error de conexión');
         }
 
+        setCardUpdate(true);
+
     };
 
     const obtenerProveedores = async () => {
@@ -86,7 +109,8 @@ export const Proveedores = () => {
 
     useEffect(() => {
         obtenerProveedores();
-    }, []);
+        setCardUpdate(false);
+    }, [cardUpdate]);
 
     return (
         <div>
@@ -94,7 +118,7 @@ export const Proveedores = () => {
                 {
                     isOpen && (
                         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto mb-60">
+                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/4 mx-auto ">
                                 <h2 className="text-xl font-semibold mb-10">Crear Proveedor</h2>
                                 {mostrarAlertaExitosa && (
                                     <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
@@ -116,22 +140,52 @@ export const Proveedores = () => {
                                 )}
                                 <form onSubmit={handleFormSubmit}>
                                     <div className="mb-4">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre Proveedor</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre</label>
                                         <input
                                             type="text"
                                             id="name"
                                             value={nombreProveedor}
-                                            onChange={handleNombreClienteChange}
+                                            onChange={handleNombreProveedorChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
                                     <div className="mb-7">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono Proveedor</label>
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono</label>
                                         <input
                                             type="text"
                                             id="email"
                                             value={telefonoProveedor}
-                                            onChange={handleTelefonoClienteChange}
+                                            onChange={handleTelefonoProveedorChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-7">
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Direccion</label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            value={direccionProveedor}
+                                            onChange={handleDireccionProveedorChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-7">
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Correo</label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            value={correoProveedor}
+                                            onChange={handleCorreoProveedorChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-7">
+                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Pais</label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            value={pais}
+                                            onChange={handlePaisProveedorChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
@@ -182,15 +236,25 @@ export const Proveedores = () => {
             </div>
 
             <div className='container px-5 py-10 mx-auto'>
-                <div className='flex flex-wrap justify-center w-full'>
+                <table className=" w-full text-sm text-left text-gray-500 dark:text-gray-400" id="table">
+                    <thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center'>
+                        <tr>
+                            <th scope="col" className="px-6 py-3">Codigo</th>
+                            <th scope="col" className="px-6 py-3">Nombre</th>
+                            <th scope="col" className="px-6 py-3">Telefono</th>
+                            <th scope="col" className="px-6 py-3">Direccion</th>
+                            <th scope="col" className="px-6 py-3">Correo</th>
+                            <th scope="col" className="px-6 py-3">Pais</th>
+                            <th scope="col" className="px-6 py-3">Acciones</th>
+                        </tr>
+                    </thead>
                     {
                         proveedores.map(proveedor => (
-                            <CardsProveedores key={proveedor.IdProveedor} nombre={proveedor.NombreProveedor} telefono={proveedor.TelefonoProveedor} />
+                            <CardsProveedores setCardUpdate={setCardUpdate} key={proveedor.IdProveedor} id={proveedor.IdProveedor} nombre={proveedor.NombreProveedor} telefono={proveedor.TelefonoProveedor} direccion={proveedor.DireccionProveedor} correo={proveedor.CorreoProveedor} localidad={proveedor.Pais} />
                         ))
                     }
-                </div>
+                </table>
             </div>
-
         </div>
     )
 }
