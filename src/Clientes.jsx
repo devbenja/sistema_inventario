@@ -8,13 +8,15 @@ export const Clientes = () => {
     const [telefonoCliente, setTelefonoCliente] = useState('');
     const [correoCliente, setCorreoCliente] = useState('');
     const [direccionCliente, setDireccionCliente] = useState('');
-    const [clientes, setClientes] = useState([0]);
+    const [clientes, setClientes] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [mensajeExitoso, setMensajeExitoso] = useState('');
     const [mensajeError, setMensajeError] = useState('');
     const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
     const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
     const [cardUpdate, setCardUpdate] = useState(false);
+
+    const [search, setSearch] = useState('');
 
 
     // Abrir el modal
@@ -42,7 +44,20 @@ export const Clientes = () => {
     const handleDireccionClienteChange = (event) => {
         setDireccionCliente(event.target.value);
     };
+    
+    const handleSearch = (e) => {
+        setSearch(e.target.value);
+    }
+ 
+    let results = [];
 
+    if(!search){
+        results = clientes
+    }else{
+        results =  clientes.filter((dato) => 
+            dato.NombreCliente.toLowerCase().includes(search.toLowerCase())
+        )
+    }
 
 
     // Esta funcion manda los datos en la peticion post
@@ -92,6 +107,7 @@ export const Clientes = () => {
 
     };
 
+    // Funcion con la peticion para traer todos los clientes
     const obtenerClientes = async () => {
         try {
             const response = await fetch("http://localhost:5000/api/Clientes");
@@ -199,14 +215,14 @@ export const Clientes = () => {
             <div className="border p-10">
                 <div className="flex flex-wrap gap-5 justify-around items-center mb-4 w-full">
                     <p className="text-xl font-medium">Clientes</p>
-                    <div className="flex gap-5 justify-around flex-wrap items-center">
+                    <div className="flex gap-5 justify-around flex-wrap items-center border">
                         <form className="flex items-center">
                             <label htmlFor="simple-search" className="sr-only">Buscar</label>
                             <div className="relative w-full">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <svg aria-hidden="true" className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
                                 </div>
-                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 blockw-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" required />
+                                <input value={search} onChange={handleSearch} type="text" id="simple-search" className="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 blockw-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" required />
                             </div>
                         </form>
 
@@ -233,7 +249,7 @@ export const Clientes = () => {
                         </tr>
                     </thead>
                     {
-                        clientes.map(cliente => (
+                        results.map(cliente => (
                             <CardsCliente 
                                 key={cliente.IdCliente} 
                                 setCardUpdate={setCardUpdate}  
