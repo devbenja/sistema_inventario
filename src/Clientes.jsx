@@ -49,15 +49,9 @@ export const Clientes = () => {
         setSearch(e.target.value);
     }
  
-    let results = [];
+    // Renderizamos la tabla completa en caso de que la barra este vacia, si no el resultado
 
-    if(!search){
-        results = clientes
-    }else{
-        results =  clientes.filter((dato) => 
-            dato.NombreCliente.toLowerCase().includes(search.toLowerCase())
-        )
-    }
+    const results = !search ? clientes : clientes.filter((dato) => dato.NombreCliente.toLowerCase().includes(search.toLowerCase()))
 
 
     // Esta funcion manda los datos en la peticion post
