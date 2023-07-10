@@ -173,50 +173,6 @@ export const Compras = () => {
     setModalVisible(true);
   };
 
-  //! PDF ANTERIOR
-  // function drawFooter(doc, pageNumber) {
-  //   const footerText = `Página ${pageNumber}`;
-  //   const x = doc.internal.pageSize.getWidth() / 2;
-  //   const y = doc.internal.pageSize.getHeight() - 10;
-
-  //   // Ajustar el tamaño de fuente y el estilo
-  //   doc.setFontSize(8);
-  //   doc.setFont("normal");
-
-  //   doc.text(footerText, x, y, { align: "center" });
-  // }
-  // const handleDownloadPDF = () => {
-  //   const table = document.querySelector("#table");
-  //   const columns = Array.from(table.querySelectorAll("th")).map(
-  //     (headerCell) => headerCell.innerText
-  //   );
-  //   const data = Array.from(table.querySelectorAll("tr"))
-  //     .slice(1)
-  //     .map((row) =>
-  //       Array.from(row.querySelectorAll("td")).map((cell) => cell.innerText)
-  //     );
-
-  //   const doc = new jsPDF();
-
-  //   // Fecha
-  //   const currentDate = new Date().toLocaleDateString();
-  //   doc.text(`Fecha: ${currentDate}`, 10, 10);
-
-  //   doc.autoTable({
-  //     head: [columns],
-  //     body: data,
-  //   });
-  //   // Pie de pagina
-  //   const totalPages = doc.internal.getNumberOfPages();
-
-  //   // Iterar sobre cada página y agregar el pie de página
-  //   for (let i = 1; i <= totalPages; i++) {
-  //     doc.setPage(i); // Establecer la página actual
-  //     drawFooter(doc, i); // Agregar el pie de página
-  //   }
-
-  //   doc.save("compras.pdf");
-  // };
   function drawFooter(doc, pageNumber) {
     const footerText = `Página ${pageNumber}`;
     const x = doc.internal.pageSize.getWidth() / 2;
@@ -315,7 +271,7 @@ export const Compras = () => {
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 p-50">
         <div className="p-20">
-          <h2>Generar compra</h2>
+          <h2 className="font-bold">Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
               className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
@@ -375,13 +331,13 @@ export const Compras = () => {
                 value={idProveedor}
                 onChange={handleIdProveedorChange}
               >
-                <option>Selecciona un proveedor</option>
+                <option>-- Selecciona un proveedor --</option>
                 {proveedores.map((proveedor) => (
                   <option
                     value={proveedor.IdProveedor}
                     key={proveedor.IdProveedor}
                   >
-                    {proveedor.IdProveedor}
+                    {`#${proveedor.IdProveedor}`} - {proveedor.NombreProveedor}
                   </option>
                 ))}
               </select>
@@ -399,10 +355,10 @@ export const Compras = () => {
                 value={idProduct}
                 onChange={handleIdProductoChange}
               >
-                <option>Selecciona una producto</option>
+                <option>-- Selecciona una producto --</option>
                 {productos.map((producto) => (
                   <option value={producto.IdProducto} key={producto.IdProducto}>
-                    {producto.IdProducto}
+                    {`#${producto.IdProducto}`} - {producto.Nombre}
                   </option>
                 ))}
               </select>
@@ -432,7 +388,7 @@ export const Compras = () => {
           </form>
         </div>
         <div className="p-20">
-          <h2>Generar Reporte de Compras</h2>
+          <h2 className="font-bold">Generar Reporte de Compras</h2>
           <div className="App-page mt-4">
             <div className="App-container">
               <form onSubmit={handleSubmit} className="mb-4">
