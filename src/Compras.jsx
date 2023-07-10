@@ -4,6 +4,8 @@ import Modal from "react-modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "./App.css";
+import { IoMdTrash } from 'react-icons/io';
+import { BiEdit } from "react-icons/bi";
 
 export const Compras = () => {
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
@@ -15,8 +17,9 @@ export const Compras = () => {
   const [entradas, setEntradas] = useState([]);
   const [proveedores, setProveedores] = useState([]);
   const [productos, setProductos] = useState([]);
-  const [idProduct, setIdProducto] = useState("");
-  const [idProveedor, setIdProveedor] = useState("");
+
+  const [nombreProducto, setNombreProducto] = useState("");
+  const [nombreProveedor, setNombreProveedor] = useState("");
   const [cantidad, setCantidad] = useState("");
 
   const [mensajeExitoso, setMensajeExitoso] = useState("");
@@ -24,21 +27,42 @@ export const Compras = () => {
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
 
+  const [precio, setPrecio] = useState('');
+
   const handleFechaSeleccionada = (fecha) => {
     setFechaSeleccionada(fecha);
   };
 
-  const handleIdProveedorChange = (event) => {
-    setIdProveedor(event.target.value);
+
+  const handleNombreProveedorChange = (event) => {
+    setNombreProveedor(event.target.value);
   };
 
-  const handleIdProductoChange = (event) => {
-    setIdProducto(event.target.value);
+  const handleNombreProductoChange = async (event) => {
+
+    const nombreProducto = event.target.value
+
+    setNombreProducto(nombreProducto);
+
+    try {
+      const url = `http://localhost:5000/api/ProductoPrecio?nombre=${nombreProducto}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      setPrecio(data.precio);
+    } catch (error) {
+      console.error('Error en la petición:', error);
+    }
+
+    
+
   };
+
+  console.log(nombreProducto)
 
   const handleIdCantidadChange = (event) => {
     setCantidad(event.target.value);
   };
+
 
   const obtenerProveedores = async () => {
     try {
@@ -72,56 +96,13 @@ export const Compras = () => {
     event.preventDefault();
 
     try {
-      const proveedorSeleccionado = proveedores.find(
-        (proveedor) => proveedor.IdProveedor === parseInt(idProveedor)
-      );
-      // Veririficar si existe el cliente
-      if (!proveedorSeleccionado) {
-        setMensajeError("Proveedor no encontrado");
-        setMostrarAlertaError(true);
-        setMensajeExitoso("");
-        setMostrarAlertaExitosa(false);
-
-        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
-        setTimeout(() => {
-          setMensajeError("");
-          setIdProducto("");
-          setIdProveedor("");
-          setCantidad("");
-          setMostrarAlertaError(false);
-        }, 3000);
-        return;
-      }
-
-      // Obtener el stock del producto seleccionado
-      const productoSeleccionado = productos.find(
-        (producto) => producto.IdProducto === parseInt(idProduct)
-      );
-
-      // Verificar si el producto existe
-      if (!productoSeleccionado) {
-        setMensajeError("Producto no encontrado");
-        setMostrarAlertaError(true);
-        setMensajeExitoso("");
-        setMostrarAlertaExitosa(false);
-
-        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
-        setTimeout(() => {
-          setMensajeError("");
-          setIdProducto("");
-          setIdProveedor("");
-          setCantidad("");
-          setMostrarAlertaError(false);
-        }, 3000);
-        return;
-      }
 
       const response = await fetch("http://localhost:5000/api/GenerarEntrada", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idProduct, idProveedor, cantidad }),
+        body: JSON.stringify({ nombreProducto, nombreProveedor, cantidad, totalEgreso }),
       });
 
       var data = await response.json();
@@ -130,8 +111,8 @@ export const Compras = () => {
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
         // Limpiar los campos de entrada después de crear el usuario
-        setIdProducto("");
-        setIdProveedor("");
+        setNombreProducto("");
+        setNombreProveedor("");
         setCantidad("");
         setMensajeError("");
         setMostrarAlertaError(false);
@@ -151,6 +132,8 @@ export const Compras = () => {
       console.log(error);
       setMensajeError("Error de conexión");
     }
+
+    console.log(nombreProducto)
   };
 
   const obtenerEntradas = async () => {
@@ -197,6 +180,7 @@ export const Compras = () => {
       console.error(error);
     }
   };
+
   const actualizarCompras = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/Entradas");
@@ -210,6 +194,7 @@ export const Compras = () => {
       console.error(error);
     }
   };
+
   useEffect(() => {
     actualizarCompras();
   }, []);
@@ -310,11 +295,13 @@ export const Compras = () => {
     doc.save("compras.pdf");
   };
 
+  const totalEgreso = cantidad * precio;
+
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-2 p-50">
-        <div className="p-20">
+      <div className="grid grid-cols-1 md:grid-cols-2 p-20">
+        <div className="">
           <h2 className="font-bold">Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
@@ -372,16 +359,16 @@ export const Compras = () => {
               <select
                 id="country"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                value={idProveedor}
-                onChange={handleIdProveedorChange}
+                value={nombreProveedor}
+                onChange={handleNombreProveedorChange}
               >
                 <option>-- Selecciona un proveedor --</option>
                 {proveedores.map((proveedor) => (
                   <option
-                    value={proveedor.IdProveedor}
+                    value={proveedor.NombreProveedor}
                     key={proveedor.IdProveedor}
                   >
-                    {`#${proveedor.IdProveedor}`} - {proveedor.NombreProveedor}
+                    {proveedor.NombreProveedor}
                   </option>
                 ))}
               </select>
@@ -396,13 +383,13 @@ export const Compras = () => {
               <select
                 id="city"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                value={idProduct}
-                onChange={handleIdProductoChange}
+                value={nombreProducto}
+                onChange={handleNombreProductoChange}
               >
                 <option>-- Selecciona una producto --</option>
                 {productos.map((producto) => (
-                  <option value={producto.IdProducto} key={producto.IdProducto}>
-                    {`#${producto.IdProducto}`} - {producto.Nombre}
+                  <option value={producto.Nombre} key={producto.IdProducto}>
+                    {producto.Nombre}
                   </option>
                 ))}
               </select>
@@ -424,6 +411,26 @@ export const Compras = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>
+
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 font-bold mb-2"
+                htmlFor="name"
+              >
+                Precio Compra
+              </label>
+              <input  type="number" value={precio} className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" />
+            </div>
+
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 font-bold mb-2"
+                htmlFor="name"
+              >
+                Total a Pagar
+              </label>
+             <input value={totalEgreso} type="number" className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"/>
+            </div>
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -432,11 +439,11 @@ export const Compras = () => {
             </button>
           </form>
         </div>
-        <div className="p-20">
+        <div className="">
           <h2 className="font-bold">Generar Reporte de Compras</h2>
           <div className="App-page mt-4">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="mb-4">
+              <form onSubmit={handleSubmit} className="mb-10">
                 {" "}
                 {/* //className="App-form" */}
                 <div className="flex">
@@ -490,32 +497,44 @@ export const Compras = () => {
               </form>
 
               {reporteCompras.length > 0 ? (
-                <table className="App-auto" id="table">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2">IdEntrada</th>
-                      <th className="px-4 py-2">IdProducto</th>
-                      <th className="px-4 py-2">IdProveedor</th>
-                      <th className="px-4 py-2">Cantidad</th>
-                      <th className="px-4 py-2">FechaEntrada</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reporteCompras.map((compra) => (
-                      <tr key={compra.IdEntrada}>
-                        <td className="border px-4 py-2">{compra.IdEntrada}</td>
-                        <td className="border px-4 py-2">{compra.Nombre}</td>
-                        <td className="border px-4 py-2">
-                          {compra.IdProveedor}
-                        </td>
-                        <td className="border px-4 py-2">{compra.Cantidad}</td>
-                        <td className="border px-4 py-2">
-                          {compra.FechaEntrada}
-                        </td>
+                <div className='overflow-x-auto'>
+                  <table className="App-auto" id="table">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
+                      <tr>
+                        <th scope="col" className="px-6 py-3"># Compra</th>
+                        <th scope="col" className="px-6 py-3">Producto</th>
+                        <th scope="col" className="px-6 py-3">Proveedor</th>
+                        <th scope="col" className="px-6 py-3">Cantidad</th>
+                        <th scope="col" className="px-6 py-3">Total Gastado</th>
+                        <th scope="col" className="px-6 py-3">FechaEntrada</th>
+                        <th scope="col" className="px-6 py-3">Acciones</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {reporteCompras.map((compra) => (
+                        <tr key={compra.IdEntrada}>
+                          <td className="border px-4 py-2">{compra.IdEntrada}</td>
+                          <td className="border px-4 py-2">{compra.NombreProducto}</td>
+                          <td className="border px-4 py-2">{compra.NombreProveedor}</td>
+                          <td className="border px-4 py-2">{compra.Cantidad}</td>
+                          <td className="border px-4 py-2">{compra.TotalDineroGastado}</td>
+                          <td className="border px-4 py-2">
+                            {compra.FechaEntrada}
+                          </td>
+                          <td className="border px-6 py-4 flex items-center justify-center">
+                            <button className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              <IoMdTrash className='w-15' />
+                            </button>
+                            <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              <BiEdit className='w-15' />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
               ) : null}
 
               <Modal
