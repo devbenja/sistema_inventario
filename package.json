@@ -10,8 +10,6 @@
     "@testing-library/user-event": "^13.5.0",
     "flowbite": "^1.6.5",
     "flowbite-react": "^0.4.7",
-    "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.5.29",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-modal": "^3.16.1",
