@@ -150,11 +150,9 @@ export const CardsProveedores = ({id, nombre, telefono, direccion, correo, local
                 <td className="border px-6 py-4 flex items-center justify-center">
                     <button className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <IoMdTrash onClick={mostrarSweetAlert} className='w-15' />
-                
                     </button>
                     <button  className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <BiEdit onClick={openModal} className='w-15' />
-                        
                     </button>
                 </td>
             </tr>

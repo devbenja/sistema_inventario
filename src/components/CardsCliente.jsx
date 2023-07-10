@@ -134,13 +134,11 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
                 <td className="border px-6 py-4">{direccion}</td>
                 <td className="border px-6 py-4">{correo}</td>
                 <td className="border px-6 py-4 flex items-center justify-center">
-                    <button onClick={mostrarSweetAlert} className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <IoMdTrash className='w-15' />
-                        Eliminar
+                    <button  className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <IoMdTrash onClick={mostrarSweetAlert} className='w-15' />
                     </button>
-                    <button onClick={openModal} className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <BiEdit className='w-15' />
-                        Editar
+                    <button  className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <BiEdit onClick={openModal} className='w-15' />
                     </button>
                 </td>
             </tr>

@@ -16,11 +16,13 @@ export const Ventas = () => {
     const [idProduct, setIdProducto] = useState("");
     const [idCliente, setIdCliente] = useState("");
     const [cantidad, setCantidad] = useState("");
+    const [total, setTotal] = useState("");
 
     const [mensajeExitoso, setMensajeExitoso] = useState("");
     const [mensajeError, setMensajeError] = useState("");
     const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
     const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+
 
     const handleFechaSeleccionada = (fecha) => {
         setFechaSeleccionada(fecha);
@@ -36,6 +38,11 @@ export const Ventas = () => {
     const handleIdCantidadChange = (event) => {
         setCantidad(event.target.value);
     };
+
+
+    const handleTotalChange = (event) => {
+        setTotal(event.target.value);
+    }
 
     const obtenerClientes = async () => {
         try {
@@ -158,6 +165,10 @@ export const Ventas = () => {
         setModalVisible(true);
     };
 
+    const precio = 20;
+
+    console.log(total);
+
     return (
         <div>
             <Header />
@@ -270,6 +281,14 @@ export const Ventas = () => {
                                 id="name"
                                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                             />
+                        </div>
+                        <div className="mb-4">
+                            <input 
+                                value={total} 
+                                onChange={handleTotalChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                            />
+                            
                         </div>
                         <button
                             type="submit"

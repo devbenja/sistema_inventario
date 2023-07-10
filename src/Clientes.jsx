@@ -4,6 +4,7 @@ import { CardsCliente } from './components/CardsCliente';
 
 export const Clientes = () => {
 
+    // HOOK DE STATE
     const [nombreCliente, setNombreCliente] = useState('');
     const [telefonoCliente, setTelefonoCliente] = useState('');
     const [correoCliente, setCorreoCliente] = useState('');
@@ -15,7 +16,6 @@ export const Clientes = () => {
     const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
     const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
     const [cardUpdate, setCardUpdate] = useState(false);
-
     const [search, setSearch] = useState('');
 
 
@@ -29,6 +29,7 @@ export const Clientes = () => {
         setIsOpen(false);
     };
 
+    // Funciones para el cambio de los inputs
     const handleNombreClienteChange = (event) => {
         setNombreCliente(event.target.value);
     };
@@ -44,13 +45,12 @@ export const Clientes = () => {
     const handleDireccionClienteChange = (event) => {
         setDireccionCliente(event.target.value);
     };
-    
+
     const handleSearch = (e) => {
         setSearch(e.target.value);
     }
- 
-    // Renderizamos la tabla completa en caso de que la barra este vacia, si no el resultado
 
+    // Renderizamos la tabla completa en caso de que la barra este vacia, si no el resultado
     const results = !search ? clientes : clientes.filter((dato) => dato.NombreCliente.toLowerCase().includes(search.toLowerCase()))
 
 
@@ -112,6 +112,7 @@ export const Clientes = () => {
         }
     }
 
+    // Hook para ejecutar la funciòn de traer clientes
     useEffect(() => {
         obtenerClientes();
         setCardUpdate(false)
@@ -219,7 +220,6 @@ export const Clientes = () => {
                                 <input value={search} onChange={handleSearch} type="text" id="simple-search" className="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 blockw-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search" required />
                             </div>
                         </form>
-
                         <button
                             className=" ml-5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onClick={openModal}
@@ -238,18 +238,18 @@ export const Clientes = () => {
                             <th scope="col" className="px-6 py-3">Nombre</th>
                             <th scope="col" className="px-6 py-3">Telefono</th>
                             <th scope="col" className="px-6 py-3">Correo</th>
-                            <th scope="col" className="px-6 py-3">Direccion</th>
+                            <th scope="col" className="px-6 py-3">Direcciòn</th>
                             <th scope="col" className="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
                     {
                         results.map(cliente => (
-                            <CardsCliente 
-                                key={cliente.IdCliente} 
-                                setCardUpdate={setCardUpdate}  
-                                id={cliente.IdCliente} nombre={cliente.NombreCliente} 
-                                telefono={cliente.TelefonoCliente} 
-                                correo={cliente.CorreoCliente} 
+                            <CardsCliente
+                                key={cliente.IdCliente}
+                                setCardUpdate={setCardUpdate}
+                                id={cliente.IdCliente} nombre={cliente.NombreCliente}
+                                telefono={cliente.TelefonoCliente}
+                                correo={cliente.CorreoCliente}
                                 direccion={cliente.DireccionCliente}
                             />
                         ))
