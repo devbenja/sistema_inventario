@@ -63,6 +63,27 @@ export const Ventas = () => {
     event.preventDefault();
 
     try {
+      const clienteSeleccionado = clientes.find(
+        (cliente) => cliente.IdCliente === parseInt(idCliente)
+      );
+      // Veririficar si existe el cliente
+      if (!clienteSeleccionado) {
+        setMensajeError("Cliente no encontrado");
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+
+        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
+        setTimeout(() => {
+          setMensajeError("");
+          setIdProducto("");
+          setIdCliente("");
+          setCantidad("");
+          setMostrarAlertaError(false);
+        }, 3000);
+        return;
+      }
+
       // Obtener el stock del producto seleccionado
       const productoSeleccionado = productos.find(
         (producto) => producto.IdProducto === parseInt(idProduct)

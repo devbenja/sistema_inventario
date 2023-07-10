@@ -72,6 +72,50 @@ export const Compras = () => {
     event.preventDefault();
 
     try {
+      const proveedorSeleccionado = proveedores.find(
+        (proveedor) => proveedor.IdProveedor === parseInt(idProveedor)
+      );
+      // Veririficar si existe el cliente
+      if (!proveedorSeleccionado) {
+        setMensajeError("Proveedor no encontrado");
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+
+        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
+        setTimeout(() => {
+          setMensajeError("");
+          setIdProducto("");
+          setIdProveedor("");
+          setCantidad("");
+          setMostrarAlertaError(false);
+        }, 3000);
+        return;
+      }
+
+      // Obtener el stock del producto seleccionado
+      const productoSeleccionado = productos.find(
+        (producto) => producto.IdProducto === parseInt(idProduct)
+      );
+
+      // Verificar si el producto existe
+      if (!productoSeleccionado) {
+        setMensajeError("Producto no encontrado");
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+
+        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
+        setTimeout(() => {
+          setMensajeError("");
+          setIdProducto("");
+          setIdProveedor("");
+          setCantidad("");
+          setMostrarAlertaError(false);
+        }, 3000);
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/api/GenerarEntrada", {
         method: "POST",
         headers: {
@@ -271,7 +315,7 @@ export const Compras = () => {
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 p-50">
         <div className="p-20">
-          <h2>Generar compra</h2>
+          <h2 className="font-bold">Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
               className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
@@ -331,13 +375,13 @@ export const Compras = () => {
                 value={idProveedor}
                 onChange={handleIdProveedorChange}
               >
-                <option>Selecciona un proveedor</option>
+                <option>-- Selecciona un proveedor --</option>
                 {proveedores.map((proveedor) => (
                   <option
                     value={proveedor.IdProveedor}
                     key={proveedor.IdProveedor}
                   >
-                    {proveedor.IdProveedor}
+                    {`#${proveedor.IdProveedor}`} - {proveedor.NombreProveedor}
                   </option>
                 ))}
               </select>
@@ -355,10 +399,10 @@ export const Compras = () => {
                 value={idProduct}
                 onChange={handleIdProductoChange}
               >
-                <option>Selecciona una producto</option>
+                <option>-- Selecciona una producto --</option>
                 {productos.map((producto) => (
                   <option value={producto.IdProducto} key={producto.IdProducto}>
-                    {producto.IdProducto}
+                    {`#${producto.IdProducto}`} - {producto.Nombre}
                   </option>
                 ))}
               </select>
@@ -372,6 +416,7 @@ export const Compras = () => {
                 Cantidad
               </label>
               <input
+                required
                 value={cantidad}
                 onChange={handleIdCantidadChange}
                 type="text"
@@ -388,7 +433,7 @@ export const Compras = () => {
           </form>
         </div>
         <div className="p-20">
-          <h2>Generar Reporte de Compras</h2>
+          <h2 className="font-bold">Generar Reporte de Compras</h2>
           <div className="App-page mt-4">
             <div className="App-container">
               <form onSubmit={handleSubmit} className="mb-4">
@@ -459,9 +504,7 @@ export const Compras = () => {
                     {reporteCompras.map((compra) => (
                       <tr key={compra.IdEntrada}>
                         <td className="border px-4 py-2">{compra.IdEntrada}</td>
-                        <td className="border px-4 py-2">
-                          {compra.Nombre}
-                        </td>
+                        <td className="border px-4 py-2">{compra.Nombre}</td>
                         <td className="border px-4 py-2">
                           {compra.IdProveedor}
                         </td>
