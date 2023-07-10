@@ -173,12 +173,105 @@ export const Compras = () => {
     setModalVisible(true);
   };
 
+  function drawFooter(doc, pageNumber) {
+    const footerText = `Página ${pageNumber}`;
+    const x = doc.internal.pageSize.getWidth() / 2;
+    const y = doc.internal.pageSize.getHeight() - 10;
+
+    // Ajustar el tamaño de fuente y el estilo
+    doc.setFontSize(8);
+    doc.setFont("normal");
+
+    doc.text(footerText, x, y, { align: "center" });
+  }
+
+  const handleDownloadPDF = () => {
+    const table = document.querySelector("#table");
+    const columns = Array.from(table.querySelectorAll("th")).map(
+      (headerCell) => headerCell.innerText
+    );
+    const data = Array.from(table.querySelectorAll("tr"))
+      .slice(1)
+      .map((row) =>
+        Array.from(row.querySelectorAll("td")).map((cell) => cell.innerText)
+      );
+
+    const doc = new jsPDF();
+
+    // Agregar imagen de encabezado
+    const headerImagePath = "./logo11.jpg"; // Reemplaza "ruta-de-la-imagen" con la ruta real de la imagen
+    const imgWidth = doc.internal.pageSize.getWidth(); // Ancho de la imagen igual al ancho de la página
+    const imgHeight = 50; // Altura de la imagen (puedes ajustarla según tus necesidades)
+    const x = 0; // Posición horizontal de la imagen (comienza desde el borde izquierdo)
+    const y = 10; // Posición vertical de la imagen
+    doc.addImage(headerImagePath, "JPEG", x, y, imgWidth, imgHeight); // Agregar imagen al PDF
+
+    // Fecha
+    const currentDate = new Date().toLocaleDateString();
+    doc.setFontSize(10); // Ajustar el tamaño de fuente
+    doc.setFont("helvetica", "bold"); // Establecer el estilo de fuente en negrita
+
+    const fechaText = "Fecha:";
+    const fechaX = 10; // Posición horizontal del texto "Fecha:"
+    const fechaTextWidth =
+      (doc.getStringUnitWidth(fechaText) * doc.internal.getFontSize()) /
+      doc.internal.scaleFactor;
+    const fechaActualX = fechaX + fechaTextWidth + 2; // Ajustar el espacio entre el texto y la fecha actual
+    doc.text(fechaText, fechaX, imgHeight + 18); // Colocar el texto "Fecha:"
+    doc.text(currentDate, fechaActualX, imgHeight + 18); // Colocar la fecha actual
+
+    doc.setFont("helvetica", "normal"); // Restaurar el estilo de fuente normal
+
+    // Texto centrado en la parte superior de la tabla
+    const textoSuperior = "Reporte de compras";
+    const textoSuperiorX = doc.internal.pageSize.getWidth() / 2;
+    const textoSuperiorY = imgHeight + 25; // Ajustar la posición vertical del texto superior
+    doc.setFontSize(12); // Ajustar el tamaño de fuente para el texto superior
+    doc.text(textoSuperior, textoSuperiorX, textoSuperiorY, {
+      align: "center",
+    });
+
+    doc.autoTable({
+      head: [columns],
+      body: data,
+      startY: imgHeight + 30, // Ajustar la posición vertical de los datos
+      didDrawCell: function (data) {
+        // Dibujar bordes de las celdas
+        const { table, row, column } = data;
+        if (row === 0) {
+          // Bordes de la fila de encabezado
+          doc.setFillColor(230, 230, 230); // Color de fondo para el encabezado
+          doc.rect(
+            data.cell.x,
+            data.cell.y,
+            data.cell.width,
+            data.cell.height,
+            "S"
+          );
+        }
+        // Bordes de las celdas
+        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height);
+      },
+    });
+
+    // Pie de página
+    const totalPages = doc.internal.getNumberOfPages();
+
+    // Iterar sobre cada página y agregar el pie de página
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i); // Establecer la página actual
+      drawFooter(doc, i); // Agregar el pie de página
+    }
+
+    doc.save("compras.pdf");
+  };
+
   return (
     <div>
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 p-50">
         <div className="p-20">
-          <h2 className="font-bold">Generar compra</h2>
+          <h2>Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
               className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
@@ -238,13 +331,13 @@ export const Compras = () => {
                 value={idProveedor}
                 onChange={handleIdProveedorChange}
               >
-                <option>-- Selecciona un proveedor --</option>
+                <option>Selecciona un proveedor</option>
                 {proveedores.map((proveedor) => (
                   <option
                     value={proveedor.IdProveedor}
                     key={proveedor.IdProveedor}
                   >
-                    {`#${proveedor.IdProveedor}`} - {proveedor.NombreProveedor}
+                    {proveedor.IdProveedor}
                   </option>
                 ))}
               </select>
@@ -262,10 +355,10 @@ export const Compras = () => {
                 value={idProduct}
                 onChange={handleIdProductoChange}
               >
-                <option>-- Selecciona una producto --</option>
+                <option>Selecciona una producto</option>
                 {productos.map((producto) => (
                   <option value={producto.IdProducto} key={producto.IdProducto}>
-                    {`#${producto.IdProducto}`} - {producto.Nombre}
+                    {producto.IdProducto}
                   </option>
                 ))}
               </select>
@@ -295,7 +388,7 @@ export const Compras = () => {
           </form>
         </div>
         <div className="p-20">
-          <h2 className="font-bold">Generar Reporte de Compras</h2>
+          <h2>Generar Reporte de Compras</h2>
           <div className="App-page mt-4">
             <div className="App-container">
               <form onSubmit={handleSubmit} className="mb-4">
@@ -367,7 +460,7 @@ export const Compras = () => {
                       <tr key={compra.IdEntrada}>
                         <td className="border px-4 py-2">{compra.IdEntrada}</td>
                         <td className="border px-4 py-2">
-                          {compra.IdProducto}
+                          {compra.Nombre}
                         </td>
                         <td className="border px-4 py-2">
                           {compra.IdProveedor}

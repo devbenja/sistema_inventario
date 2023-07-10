@@ -3,7 +3,7 @@ import { Header } from "./Header";
 import Modal from "react-modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-// import html2canvas from "html2canvas";
+
 import "./App.css";
 export const Ventas = () => {
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
@@ -12,44 +12,24 @@ export const Ventas = () => {
   const [reporteVentas, setReporteVentas] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
-<<<<<<< HEAD
-    const [salidas, setSalidas] = useState([]);
-    const [clientes, setClientes] = useState([]);
-    const [productos, setProductos] = useState([]);
-    const [idProduct, setIdProducto] = useState("");
-    const [idCliente, setIdCliente] = useState("");
-    const [cantidad, setCantidad] = useState("");
-    const [total, setTotal] = useState("");
-=======
   const [salidas, setSalidas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [productos, setProductos] = useState([]);
   const [idProduct, setIdProducto] = useState("");
   const [idCliente, setIdCliente] = useState("");
   const [cantidad, setCantidad] = useState("");
->>>>>>> ee72ac1f1c7fbfb5a6c1e4677e90cdf9217db5b1
 
   const [mensajeExitoso, setMensajeExitoso] = useState("");
   const [mensajeError, setMensajeError] = useState("");
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
 
-<<<<<<< HEAD
-
-    const handleFechaSeleccionada = (fecha) => {
-        setFechaSeleccionada(fecha);
-    };
-    const handleIdClienteChange = (event) => {
-        setIdCliente(event.target.value);
-    };
-=======
   const handleFechaSeleccionada = (fecha) => {
     setFechaSeleccionada(fecha);
   };
   const handleIdClienteChange = (event) => {
     setIdCliente(event.target.value);
   };
->>>>>>> ee72ac1f1c7fbfb5a6c1e4677e90cdf9217db5b1
 
   const handleIdProductoChange = (event) => {
     setIdProducto(event.target.value);
@@ -59,20 +39,6 @@ export const Ventas = () => {
     setCantidad(event.target.value);
   };
 
-<<<<<<< HEAD
-
-    const handleTotalChange = (event) => {
-        setTotal(event.target.value);
-    }
-
-    const obtenerClientes = async () => {
-        try {
-            const response = await fetch("http://localhost:5000/api/Clientes");
-            const data = await response.json();
-            setClientes(data);
-        } catch (error) {
-            console.error("Error al obtener proveedores", error);
-=======
   const obtenerClientes = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/Clientes");
@@ -164,7 +130,6 @@ export const Ventas = () => {
         );
         if (productoIndex !== -1) {
           productos[productoIndex].Stock = stockActualizado;
->>>>>>> ee72ac1f1c7fbfb5a6c1e4677e90cdf9217db5b1
         }
 
         // Ocultar la alerta de éxito después de 3 segundos
@@ -267,218 +232,6 @@ export const Ventas = () => {
     setModalVisible(true);
   };
 
-  //  //! image
-  // function drawFooter(doc, pageNumber) {
-  //   const footerText = `Página ${pageNumber}`;
-  //   const x = doc.internal.pageSize.getWidth() / 2;
-  //   const y = doc.internal.pageSize.getHeight() - 10;
-
-  //   // Ajustar el tamaño de fuente y el estilo
-  //   doc.setFontSize(8);
-  //   doc.setFont("normal");
-
-  //   doc.text(footerText, x, y, { align: "center" });
-  // }
-
-  // const handleDownloadPDF = () => {
-  //   const table = document.querySelector("#table");
-  //   const columns = Array.from(table.querySelectorAll("th")).map(
-  //     (headerCell) => headerCell.innerText
-  //   );
-  //   const data = Array.from(table.querySelectorAll("tr"))
-  //     .slice(1)
-  //     .map((row) =>
-  //       Array.from(row.querySelectorAll("td")).map((cell) => cell.innerText)
-  //     );
-
-  //   const doc = new jsPDF();
-
-  //   // Agregar imagen de encabezado
-  //   const headerImagePath = "./logo11.jpg"; // Reemplaza "ruta-de-la-imagen" con la ruta real de la imagen
-  //   const imgWidth = doc.internal.pageSize.getWidth(); // Ancho de la imagen igual al ancho de la página
-  //   const imgHeight = 50; // Altura de la imagen (puedes ajustarla según tus necesidades)
-  //   const x = 0; // Posición horizontal de la imagen (comienza desde el borde izquierdo)
-  //   const y = 10; // Posición vertical de la imagen
-  //   doc.addImage(headerImagePath, "JPEG", x, y, imgWidth, imgHeight); // Agregar imagen al PDF
-
-<<<<<<< HEAD
-    const precio = 20;
-
-    console.log(total);
-
-    return (
-        <div>
-            <Header />
-            <div className="grid grid-cols-1 md:grid-cols-2 p-50">
-                <div className="p-20">
-                    <h2 className="font-bold">Generar venta</h2>
-                    {mostrarAlertaExitosa && (
-                        <div
-                            className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
-                            role="alert"
-                        >
-                            <svg
-                                className="w-5 h-5 inline mr-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                    clip-rule="evenodd"
-                                ></path>
-                            </svg>
-                            <div>
-                                <span className="font-medium">{mensajeExitoso}</span>
-                            </div>
-                        </div>
-                    )}
-=======
-  //   // Fecha
-  //   const currentDate = new Date().toLocaleDateString();
-  //   doc.setFontSize(10); // Ajustar el tamaño de fuente
-  //   doc.setFont("helvetica", "bold"); // Establecer el estilo de fuente en negrita
->>>>>>> ee72ac1f1c7fbfb5a6c1e4677e90cdf9217db5b1
-
-  //   const fechaText = "Fecha:";
-  //   const fechaX = 10; // Posición horizontal del texto "Fecha:"
-  //   const fechaTextWidth =
-  //     (doc.getStringUnitWidth(fechaText) * doc.internal.getFontSize()) /
-  //     doc.internal.scaleFactor;
-  //   const fechaActualX = fechaX + fechaTextWidth + 2; // Ajustar el espacio entre el texto y la fecha actual
-  //   doc.text(fechaText, fechaX, imgHeight + 18); // Colocar el texto "Fecha:"
-  //   doc.text(currentDate, fechaActualX, imgHeight + 18); // Colocar la fecha actual
-
-<<<<<<< HEAD
-                        <div className="mb-4">
-                            <label
-                                className="block text-gray-700 font-bold mb-2"
-                                htmlFor="name"
-                            >
-                                Cantidad
-                            </label>
-                            <input
-                                required
-                                value={cantidad}
-                                onChange={handleIdCantidadChange}
-                                type="text"
-                                id="name"
-                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <input 
-                                value={total} 
-                                onChange={handleTotalChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                            />
-                            
-                        </div>
-                        <button
-                            type="submit"
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            Enviar
-                        </button>
-                    </form>
-                </div>
-=======
-  //   doc.setFont("helvetica", "normal"); // Restaurar el estilo de fuente normal
->>>>>>> ee72ac1f1c7fbfb5a6c1e4677e90cdf9217db5b1
-
-  //   doc.autoTable({
-  //     head: [columns],
-  //     body: data,
-  //     startY: imgHeight + 30, // Ajustar la posición vertical de los datos
-  //   });
-
-  //   // Pie de página
-  //   const totalPages = doc.internal.getNumberOfPages();
-
-  //   // Iterar sobre cada página y agregar el pie de página
-  //   for (let i = 1; i <= totalPages; i++) {
-  //     doc.setPage(i); // Establecer la página actual
-  //     drawFooter(doc, i); // Agregar el pie de página
-  //   }
-
-  //   doc.save("ventas.pdf");
-  // };
-  // function drawFooter(doc, pageNumber) {
-  //   const footerText = `Página ${pageNumber}`;
-  //   const x = doc.internal.pageSize.getWidth() / 2;
-  //   const y = doc.internal.pageSize.getHeight() - 10;
-
-  //   // Ajustar el tamaño de fuente y el estilo
-  //   doc.setFontSize(8);
-  //   doc.setFont("normal");
-
-  //   doc.text(footerText, x, y, { align: "center" });
-  // }
-
-  // const handleDownloadPDF = () => {
-  //   const table = document.querySelector("#table");
-  //   const columns = Array.from(table.querySelectorAll("th")).map(
-  //     (headerCell) => headerCell.innerText
-  //   );
-  //   const data = Array.from(table.querySelectorAll("tr"))
-  //     .slice(1)
-  //     .map((row) =>
-  //       Array.from(row.querySelectorAll("td")).map((cell) => cell.innerText)
-  //     );
-
-  //   const doc = new jsPDF();
-
-  //   // Agregar imagen de encabezado
-  //   const headerImagePath = "./logo11.jpg"; // Reemplaza "ruta-de-la-imagen" con la ruta real de la imagen
-  //   const imgWidth = doc.internal.pageSize.getWidth(); // Ancho de la imagen igual al ancho de la página
-  //   const imgHeight = 50; // Altura de la imagen (puedes ajustarla según tus necesidades)
-  //   const x = 0; // Posición horizontal de la imagen (comienza desde el borde izquierdo)
-  //   const y = 10; // Posición vertical de la imagen
-  //   doc.addImage(headerImagePath, "JPEG", x, y, imgWidth, imgHeight); // Agregar imagen al PDF
-
-  //   // Fecha
-  //   const currentDate = new Date().toLocaleDateString();
-  //   doc.setFontSize(10); // Ajustar el tamaño de fuente
-  //   doc.setFont("helvetica", "bold"); // Establecer el estilo de fuente en negrita
-
-  //   const fechaText = "Fecha:";
-  //   const fechaX = 10; // Posición horizontal del texto "Fecha:"
-  //   const fechaTextWidth =
-  //     (doc.getStringUnitWidth(fechaText) * doc.internal.getFontSize()) /
-  //     doc.internal.scaleFactor;
-  //   const fechaActualX = fechaX + fechaTextWidth + 2; // Ajustar el espacio entre el texto y la fecha actual
-  //   doc.text(fechaText, fechaX, imgHeight + 18); // Colocar el texto "Fecha:"
-  //   doc.text(currentDate, fechaActualX, imgHeight + 18); // Colocar la fecha actual
-
-  //   doc.setFont("helvetica", "normal"); // Restaurar el estilo de fuente normal
-
-  //   // Texto centrado en la parte superior de la tabla
-  //   const textoSuperior = "Reporte de Ventas";
-  //   const textoSuperiorX = doc.internal.pageSize.getWidth() / 2;
-  //   const textoSuperiorY = imgHeight + 25; // Ajustar la posición vertical del texto superior
-  //   doc.setFontSize(12); // Ajustar el tamaño de fuente para el texto superior
-  //   doc.text(textoSuperior, textoSuperiorX, textoSuperiorY, {
-  //     align: "center",
-  //   });
-
-  //   doc.autoTable({
-  //     head: [columns],
-  //     body: data,
-  //     startY: imgHeight + 30, // Ajustar la posición vertical de los datos
-  //   });
-
-  //   // Pie de página
-  //   const totalPages = doc.internal.getNumberOfPages();
-
-  //   // Iterar sobre cada página y agregar el pie de página
-  //   for (let i = 1; i <= totalPages; i++) {
-  //     doc.setPage(i); // Establecer la página actual
-  //     drawFooter(doc, i); // Agregar el pie de página
-  //   }
-
-  //   doc.save("ventas.pdf");
-  // };
   //! new
   function drawFooter(doc, pageNumber) {
     const footerText = `Página ${pageNumber}`;
