@@ -4,15 +4,25 @@ import Modal from "react-modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "./App.css";
-import { IoMdTrash } from 'react-icons/io';
+import { IoMdTrash } from "react-icons/io";
 import { BiEdit } from "react-icons/bi";
 
+import Swal from "sweetalert2";
+
+import withReactContent from "sweetalert2-react-content";
+
 export const Compras = () => {
+  const MySwal = withReactContent(Swal);
+
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [reporteCompras, setReporteCompras] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+
+  // const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
+  const [compraSeleccionada, setCompraSeleccionada] = useState(null);
 
   const [entradas, setEntradas] = useState([]);
   const [proveedores, setProveedores] = useState([]);
@@ -27,20 +37,29 @@ export const Compras = () => {
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
 
-  const [precio, setPrecio] = useState('');
+  const [precio, setPrecio] = useState("");
+  const [compras, setCompras] = useState([]);
+
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+
+  const abrirConfirmModal = () => {
+    setConfirmModalVisible(true);
+  };
+
+  const cerrarConfirmModal = () => {
+    setConfirmModalVisible(false);
+  };
 
   const handleFechaSeleccionada = (fecha) => {
     setFechaSeleccionada(fecha);
   };
-
 
   const handleNombreProveedorChange = (event) => {
     setNombreProveedor(event.target.value);
   };
 
   const handleNombreProductoChange = async (event) => {
-
-    const nombreProducto = event.target.value
+    const nombreProducto = event.target.value;
 
     setNombreProducto(nombreProducto);
 
@@ -50,19 +69,13 @@ export const Compras = () => {
       const data = await response.json();
       setPrecio(data.precio);
     } catch (error) {
-      console.error('Error en la petición:', error);
+      console.error("Error en la petición:", error);
     }
-
-    
-
   };
-
-  console.log(nombreProducto)
 
   const handleIdCantidadChange = (event) => {
     setCantidad(event.target.value);
   };
-
 
   const obtenerProveedores = async () => {
     try {
@@ -96,13 +109,61 @@ export const Compras = () => {
     event.preventDefault();
 
     try {
+      const proveedorSeleccionado = proveedores.find(
+        (proveedor) => proveedor.NombreProveedor === nombreProveedor
+      );
+      // Veririficar si existe el cliente
+      if (!proveedorSeleccionado) {
+        setMensajeError("Proveedor no encontrado");
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+
+        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
+        setTimeout(() => {
+          setMensajeError("");
+          setNombreProveedor("");
+          setNombreProducto("");
+          setCantidad("");
+          setMostrarAlertaError(false);
+        }, 3000);
+        return;
+      }
+
+      // Obtener el stock del producto seleccionado
+      const productoSeleccionado = productos.find(
+        (producto) => producto.Nombre === nombreProducto
+      );
+
+      // Verificar si el producto existe
+      if (!productoSeleccionado) {
+        setMensajeError("Producto no encontrado");
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+
+        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
+        setTimeout(() => {
+          setMensajeError("");
+          setNombreProducto("");
+          setNombreProveedor("");
+          setCantidad("");
+          setMostrarAlertaError(false);
+        }, 3000);
+        return;
+      }
 
       const response = await fetch("http://localhost:5000/api/GenerarEntrada", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nombreProducto, nombreProveedor, cantidad, totalEgreso }),
+        body: JSON.stringify({
+          nombreProducto,
+          nombreProveedor,
+          cantidad,
+          totalEgreso,
+        }),
       });
 
       var data = await response.json();
@@ -122,6 +183,8 @@ export const Compras = () => {
         setTimeout(() => {
           setMostrarAlertaExitosa(false);
         }, 3000);
+        // Actualizar la lista de compras desde el backend
+        await actualizarCompras();
       } else {
         setMensajeError(data.mensaje);
         setMostrarAlertaError(true);
@@ -133,7 +196,7 @@ export const Compras = () => {
       setMensajeError("Error de conexión");
     }
 
-    console.log(nombreProducto)
+    // console.log(nombreProducto);
   };
 
   const obtenerEntradas = async () => {
@@ -150,7 +213,6 @@ export const Compras = () => {
     obtenerEntradas();
   }, []);
 
-  //  !
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -169,7 +231,7 @@ export const Compras = () => {
         const data = await response.json();
         console.log(data); // Imprime los datos de la respuesta del servidor en la consola del navegador
         if (data.length === 0) {
-          setModalVisible(true);
+          setModalVisible2(true);
         } else {
           setReporteCompras(data);
         }
@@ -186,7 +248,8 @@ export const Compras = () => {
       const response = await fetch("http://localhost:5000/api/Entradas");
       if (response.ok) {
         const data = await response.json();
-        setReporteCompras(data);
+        // setReporteCompras(data);/*esto es para los reportes */
+        setCompras(data);
       } else {
         console.error("Error al obtener las ventas");
       }
@@ -199,7 +262,7 @@ export const Compras = () => {
     actualizarCompras();
   }, []);
   const mostrarModalSinRegistros = () => {
-    setModalVisible(true);
+    setModalVisible2(true);
   };
 
   function drawFooter(doc, pageNumber) {
@@ -216,9 +279,9 @@ export const Compras = () => {
 
   const handleDownloadPDF = () => {
     const table = document.querySelector("#table");
-    const columns = Array.from(table.querySelectorAll("th")).map(
-      (headerCell) => headerCell.innerText
-    );
+    const columns = Array.from(
+      table.querySelectorAll("th:not(:last-child)")
+    ).map((headerCell) => headerCell.innerText);
     const data = Array.from(table.querySelectorAll("tr"))
       .slice(1)
       .map((row) =>
@@ -297,11 +360,75 @@ export const Compras = () => {
 
   const totalEgreso = cantidad * precio;
 
+  const eliminarCompra = async (idCompra) => {
+    try {
+      const compraExistente = compras.find(
+        (compra) => compra.IdEntrada === idCompra
+      );
+
+      if (!compraExistente) {
+        throw new Error("No se encontró la compra en la lista de compras.");
+      }
+
+      const { value } = await MySwal.fire({
+        title: "Confirmar eliminación",
+        text: "¿Estás seguro de que deseas eliminar esta compra?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (value) {
+        const response = await fetch(
+          `http://localhost:5000/api/EliminarEntrada/${idCompra}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          const producto = productos.find(
+            (producto) => producto.Nombre === compraExistente.NombreProducto
+          );
+
+          const cantidadEliminada = compraExistente.Cantidad;
+          const nuevoStock = producto.Stock - cantidadEliminada;
+
+          const nuevosProductos = productos.map((p) => {
+            if (p.Nombre === compraExistente.NombreProducto) {
+              return { ...p, Stock: nuevoStock };
+            }
+            return p;
+          });
+          setProductos(nuevosProductos);
+
+          setCompras(compras.filter((compra) => compra.IdEntrada !== idCompra));
+
+          // Utilizar SweetAlert para mostrar la alerta de éxito al eliminar la compra
+          MySwal.fire("Eliminado", "La compra ha sido eliminada.", "success");
+        } else {
+          const errorMessage = await response.text();
+          throw new Error(errorMessage);
+        }
+      }
+    } catch (error) {
+      console.error("Error al eliminar la compra:", error);
+      MySwal.fire(
+        "Error",
+        "Ocurrió un error al eliminar la compra. Por favor, inténtalo nuevamente.",
+        "error"
+      );
+    }
+  };
+
   return (
     <div>
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 p-20">
-        <div className="">
+        <div className="w-1/2">
           <h2 className="font-bold">Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
@@ -348,7 +475,8 @@ export const Compras = () => {
               </div>
             </div>
           )}
-          <form onSubmit={handleFormSubmit} className="p-10">
+
+          <form onSubmit={handleFormSubmit} className="p-10 ">
             <div className="mb-4">
               <label
                 className="block text-gray-700 font-bold mb-2"
@@ -362,7 +490,7 @@ export const Compras = () => {
                 value={nombreProveedor}
                 onChange={handleNombreProveedorChange}
               >
-                <option>-- Selecciona un proveedor --</option>
+                <option>-- Proveedor --</option>
                 {proveedores.map((proveedor) => (
                   <option
                     value={proveedor.NombreProveedor}
@@ -386,7 +514,7 @@ export const Compras = () => {
                 value={nombreProducto}
                 onChange={handleNombreProductoChange}
               >
-                <option>-- Selecciona una producto --</option>
+                <option>-- Producto --</option>
                 {productos.map((producto) => (
                   <option value={producto.Nombre} key={producto.IdProducto}>
                     {producto.Nombre}
@@ -419,7 +547,11 @@ export const Compras = () => {
               >
                 Precio Compra
               </label>
-              <input  type="number" value={precio} className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" />
+              <input
+                type="number"
+                value={precio}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              />
             </div>
 
             <div className="mb-4">
@@ -429,7 +561,11 @@ export const Compras = () => {
               >
                 Total a Pagar
               </label>
-             <input value={totalEgreso} type="number" className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"/>
+              <input
+                value={totalEgreso}
+                type="number"
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              />
             </div>
             <button
               type="submit"
@@ -495,38 +631,76 @@ export const Compras = () => {
                   Generar pdf
                 </button>
               </form>
-
-              {reporteCompras.length > 0 ? (
-                <div className='overflow-x-auto'>
+              {/* se esta modificando para que contenga las compras asi estaba: reporteCompras */}
+              {compras.length > 0 ? (
+                <div className="overflow-x-auto">
                   <table className="App-auto" id="table">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                       <tr>
-                        <th scope="col" className="px-6 py-3"># Compra</th>
-                        <th scope="col" className="px-6 py-3">Producto</th>
-                        <th scope="col" className="px-6 py-3">Proveedor</th>
-                        <th scope="col" className="px-6 py-3">Cantidad</th>
-                        <th scope="col" className="px-6 py-3">Total Gastado</th>
-                        <th scope="col" className="px-6 py-3">FechaEntrada</th>
-                        <th scope="col" className="px-6 py-3">Acciones</th>
+                        <th scope="col" className="px-6 py-3">
+                          # Compra
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Producto
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Proveedor
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Cantidad
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Total Gastado
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          FechaEntrada
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Acciones
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {reporteCompras.map((compra) => (
-                        <tr key={compra.IdEntrada}>
-                          <td className="border px-4 py-2">{compra.IdEntrada}</td>
-                          <td className="border px-4 py-2">{compra.NombreProducto}</td>
-                          <td className="border px-4 py-2">{compra.NombreProveedor}</td>
-                          <td className="border px-4 py-2">{compra.Cantidad}</td>
-                          <td className="border px-4 py-2">{compra.TotalDineroGastado}</td>
+                      {/* igual aca para rellenar seran con compra antes estaba: reporte.Compras */}
+                      {compras.map((compra) => (
+                        <tr
+                          key={compra.IdEntrada}
+                          compra={compra}
+                          // eliminarCompra={eliminarCompra}
+                        >
+                          <td className="border px-4 py-2">
+                            {compra.IdEntrada}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {compra.NombreProducto}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {compra.NombreProveedor}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {compra.Cantidad}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {compra.TotalDineroGastado}
+                          </td>
                           <td className="border px-4 py-2">
                             {compra.FechaEntrada}
                           </td>
                           <td className="border px-6 py-4 flex items-center justify-center">
-                            <button className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <IoMdTrash className='w-15' />
+                            <button
+                              className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              // este funciona
+                              // onClick={() => {
+                              //   setCompraSeleccionada(compra);
+                              //   abrirConfirmModal();
+                              // }}
+                              onClick={() => eliminarCompra(compra.IdEntrada)}
+                            >
+                              <IoMdTrash className="w-15" />
                             </button>
+
                             <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <BiEdit className='w-15' />
+                              <BiEdit className="w-15" />
                             </button>
                           </td>
                         </tr>
@@ -534,22 +708,20 @@ export const Compras = () => {
                     </tbody>
                   </table>
                 </div>
-
               ) : null}
 
               <Modal
-                isOpen={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                isOpen={modalVisible2}
+                onRequestClose={() => setModalVisible2(false)}
                 className="App-modal"
                 overlayClassName="App-modal-overlay"
               >
-                {/* <h2>No hay registros disponibles</h2> */}
                 <p id="message">
                   No se encontraron registros para la fecha seleccionada.
                 </p>
                 <button
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
-                  onClick={() => setModalVisible(false)}
+                  onClick={() => setModalVisible2(false)}
                 >
                   Cerrar
                 </button>
