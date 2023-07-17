@@ -15,6 +15,8 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
 
     const [nombreCliente, setNombreCliente] = useState('');
     const [telefonoCliente, setTelefonoCliente] = useState('');
+    const [direccionCliente, setDireccionCliente] = useState('');
+    const [correoCliente, setCorreoCliente] = useState('');
 
     const handleNombreClienteChange = (event) => {
         setNombreCliente(event.target.value);
@@ -24,6 +26,13 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
         setTelefonoCliente(event.target.value);
     };
 
+    const handleDireccionClienteChange = (event) => {
+        setDireccionCliente(event.target.value);
+    };
+
+    const handleCorreoClienteChange = (event) => {
+        setCorreoCliente(event.target.value);
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -36,7 +45,7 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ nombreCliente, telefonoCliente }),
+                    body: JSON.stringify({ nombreCliente, telefonoCliente, correoCliente, direccionCliente }),
                 }
             );
 
@@ -48,6 +57,8 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
                 setMostrarAlertaExitosa(true);
                 setNombreCliente('');
                 setTelefonoCliente('');
+                setCorreoCliente('');
+                setDireccionCliente('');
 
                 setTimeout(() => {
                     setMostrarAlertaExitosa(false);
@@ -76,7 +87,9 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
     const openModal = () => {
         setIsOpen(true);
         setNombreCliente(nombre);
-        setTelefonoCliente(telefono)
+        setTelefonoCliente(telefono);
+        setDireccionCliente(direccion);
+        setCorreoCliente(correo);
     };
 
     // Cerrar el modal
@@ -145,7 +158,7 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
             {
                 isOpen && (
                     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                        <div className="bg-white p-8 rounded-lg shadow-lg w-1/3 mx-auto mb-60">
+                        <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto">
                             <h2 className="text-xl font-semibold mb-10">Editar datos del cliente</h2>
                             {mostrarAlertaExitosa && (
                                 <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
@@ -167,7 +180,7 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
                             )}
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-4">
-                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre Cliente</label>
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre</label>
                                     <input
                                         value={nombreCliente}
                                         onChange={handleNombreClienteChange}
@@ -177,10 +190,30 @@ export const CardsCliente = ({ id, nombre, telefono, correo, direccion, setCardU
                                     />
                                 </div>
                                 <div className="mb-7">
-                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono Cliente</label>
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono</label>
                                     <input
                                         value={telefonoCliente}
                                         onChange={handleTelefonoClienteChange}
+                                        type="text"
+                                        id="number"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-7">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Direccion</label>
+                                    <input
+                                        value={direccionCliente}
+                                        onChange={handleDireccionClienteChange}
+                                        type="text"
+                                        id="number"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-7">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Correo</label>
+                                    <input
+                                        value={correoCliente}
+                                        onChange={handleCorreoClienteChange}
                                         type="text"
                                         id="number"
                                         className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"

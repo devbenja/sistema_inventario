@@ -8,7 +8,6 @@ import { IoMdTrash } from "react-icons/io";
 import { BiEdit } from "react-icons/bi";
 
 import Swal from "sweetalert2";
-
 import withReactContent from "sweetalert2-react-content";
 
 export const Compras = () => {
@@ -64,13 +63,14 @@ export const Compras = () => {
     setNombreProducto(nombreProducto);
 
     try {
-      const url = `http://localhost:5000/api/ProductoPrecio?nombre=${nombreProducto}`;
+      const url = `http://localhost:5000/api/ProductoPrecioCompra?nombre=${nombreProducto}`;
       const response = await fetch(url);
       const data = await response.json();
       setPrecio(data.precio);
     } catch (error) {
       console.error("Error en la petición:", error);
     }
+
   };
 
   const handleIdCantidadChange = (event) => {
@@ -169,6 +169,7 @@ export const Compras = () => {
       var data = await response.json();
 
       if (response.ok) {
+        Swal.fire('Realizaciòn de compra', 'Compra realizada correctamente', 'success')
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
         // Limpiar los campos de entrada después de crear el usuario
@@ -427,9 +428,9 @@ export const Compras = () => {
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-2 p-20">
-        <div className="w-1/2">
-          <h2 className="font-bold">Generar compra</h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-2 p-10">
+        <div className="md:col-span-1 col-span-1 bg-white p-5 rounded-lg shadow-lg">
+          <h2 className="text-xl font-semibold mb-6">Generar compra</h2>
           {mostrarAlertaExitosa && (
             <div
               className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
@@ -476,21 +477,21 @@ export const Compras = () => {
             </div>
           )}
 
-          <form onSubmit={handleFormSubmit} className="p-10 ">
+          <form onSubmit={handleFormSubmit}>
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="country"
               >
                 Proveedor
               </label>
               <select
                 id="country"
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 value={nombreProveedor}
                 onChange={handleNombreProveedorChange}
               >
-                <option>-- Proveedor --</option>
+                <option>-- Seleccionar --</option>
                 {proveedores.map((proveedor) => (
                   <option
                     value={proveedor.NombreProveedor}
@@ -503,18 +504,18 @@ export const Compras = () => {
             </div>
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="city"
               >
                 Producto
               </label>
               <select
                 id="city"
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 value={nombreProducto}
                 onChange={handleNombreProductoChange}
               >
-                <option>-- Producto --</option>
+                <option>-- Seleccionar --</option>
                 {productos.map((producto) => (
                   <option value={producto.Nombre} key={producto.IdProducto}>
                     {producto.Nombre}
@@ -525,7 +526,7 @@ export const Compras = () => {
 
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="name"
               >
                 Cantidad
@@ -536,13 +537,13 @@ export const Compras = () => {
                 onChange={handleIdCantidadChange}
                 type="text"
                 id="name"
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="name"
               >
                 Precio Compra
@@ -550,13 +551,13 @@ export const Compras = () => {
               <input
                 type="number"
                 value={precio}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
 
-            <div className="mb-4">
+            <div className="mb-8">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="name"
               >
                 Total a Pagar
@@ -564,72 +565,71 @@ export const Compras = () => {
               <input
                 value={totalEgreso}
                 type="number"
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-green-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full"
             >
-              Enviar
+              Realizar compra
             </button>
           </form>
         </div>
-        <div className="">
-          <h2 className="font-bold">Generar Reporte de Compras</h2>
+        <div className="md:col-span-3 bg-white p-5 rounded-lg shadow-lg overflow-y-auto">
+          <h2 className="font-semibold text-xl mb-6">Generar Reporte de Compras</h2>
           <div className="App-page mt-4">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="mb-10">
-                {" "}
-                {/* //className="App-form" */}
-                <div className="flex">
-                  <div className="mr-4">
+              <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center">
+                <div className="flex flex-wrap items-center justify-center">
+                  <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
                     <label
-                      className="block text-gray-700 font-bold mb-2"
+                      className="text-gray-700 font-semibold mb-2"
                       htmlFor="startDate"
                     >
-                      Fecha de inicio:
+                      Fecha de inicio
                       <input
                         type="date"
                         value={fechaInicio}
                         onChange={(e) => setFechaInicio(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                        className="w-full px-4 uppercase py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                         required
-                      />{" "}
-                      {/* className="App-input" */}
+                      />           
                     </label>
                   </div>
-                  <label
-                    className="block text-gray-700 font-bold mb-2"
-                    htmlFor="endDate"
-                  >
-                    Fecha de fin:
-                    <input
-                      type="date"
-                      value={fechaFin}
-                      onChange={(e) => setFechaFin(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 "
-                      required
-                    />
-                  </label>{" "}
-                  {/* className="App-input" */}
+                  <div className="w-full lg:w-1/4 mb-2 sm:mr-4">
+                    <label
+                      className="text-gray-700 font-semibold mb-2"
+                      htmlFor="endDate"
+                    >
+                      Fecha de fin
+                      <input
+                        type="date"
+                        value={fechaFin}
+                        onChange={(e) => setFechaFin(e.target.value)}
+                        className="w-full uppercase px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 "
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div className="flex mt-4 items-center justify-center gap-2">
+                    <button
+                      type="submit"
+                      className="block bg-blue-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded"
+                    >
+                      Generar reporte
+                    </button>
+                    <button
+                      onClick={handleDownloadPDF}
+                      id="btnPdf"
+                      type="button"
+                      download="ventas.pdf"
+                      className="bg-blue-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded ms-5"
+                    >
+                      Generar PDF
+                    </button>
+                  </div>
                 </div>
-                <br />
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt--6"
-                >
-                  Generar reporte
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  id="btnPdf"
-                  type="button"
-                  download="ventas.pdf"
-                  className="bg-blue-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt--6 ms-5"
-                >
-                  Generar pdf
-                </button>
               </form>
               {/* se esta modificando para que contenga las compras asi estaba: reporteCompras */}
               {compras.length > 0 ? (
@@ -637,7 +637,7 @@ export const Compras = () => {
                   <table className="App-auto" id="table">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                       <tr>
-                        <th scope="col" className="px-6 py-3">
+                        <th scope="col" className="py-3">
                           # Compra
                         </th>
                         <th scope="col" className="px-6 py-3">
@@ -653,7 +653,7 @@ export const Compras = () => {
                           Total Gastado
                         </th>
                         <th scope="col" className="px-6 py-3">
-                          FechaEntrada
+                          Fecha Entrada
                         </th>
                         <th scope="col" className="px-6 py-3">
                           Acciones
@@ -666,9 +666,9 @@ export const Compras = () => {
                         <tr
                           key={compra.IdEntrada}
                           compra={compra}
-                          // eliminarCompra={eliminarCompra}
+                        // eliminarCompra={eliminarCompra}
                         >
-                          <td className="border px-4 py-2">
+                          <td className="border px-4 py-2 text-center">
                             {compra.IdEntrada}
                           </td>
                           <td className="border px-4 py-2">
@@ -677,11 +677,11 @@ export const Compras = () => {
                           <td className="border px-4 py-2">
                             {compra.NombreProveedor}
                           </td>
-                          <td className="border px-4 py-2">
-                            {compra.Cantidad}
+                          <td className="border px-4 py-2 text-center">
+                            {compra.Cantidad} 
                           </td>
-                          <td className="border px-4 py-2">
-                            {compra.TotalDineroGastado}
+                          <td className="border px-4 py-2 text-center">
+                            {compra.TotalDineroGastado} C$
                           </td>
                           <td className="border px-4 py-2">
                             {compra.FechaEntrada}
@@ -727,10 +727,9 @@ export const Compras = () => {
                 </button>
               </Modal>
             </div>
-          </div>
-          <div className="overflow-x-auto mt-8"></div>
+          </div>         
         </div>
       </div>
-    </div>
+    </div >
   );
 };

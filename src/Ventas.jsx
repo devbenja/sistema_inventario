@@ -3,6 +3,9 @@ import { Header } from "./Header";
 import Modal from "react-modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { IoMdTrash } from "react-icons/io";
+import { BiEdit } from "react-icons/bi";
+import Swal from "sweetalert2";
 
 import "./App.css";
 export const Ventas = () => {
@@ -15,8 +18,8 @@ export const Ventas = () => {
   const [salidas, setSalidas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [productos, setProductos] = useState([]);
-  const [idProduct, setIdProducto] = useState("");
-  const [idCliente, setIdCliente] = useState("");
+  const [nombreProducto, setNombreProducto] = useState("");
+  const [nombreCliente, setNombreCliente] = useState("");
   const [cantidad, setCantidad] = useState("");
 
   const [mensajeExitoso, setMensajeExitoso] = useState("");
@@ -24,20 +27,37 @@ export const Ventas = () => {
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
 
+  const [precio, setPrecio] = useState("");
+
   const handleFechaSeleccionada = (fecha) => {
     setFechaSeleccionada(fecha);
   };
-  const handleIdClienteChange = (event) => {
-    setIdCliente(event.target.value);
+  const handleNombreClienteChange = (event) => {
+    setNombreCliente(event.target.value);
   };
 
-  const handleIdProductoChange = (event) => {
-    setIdProducto(event.target.value);
+  const handleNombreProductoChange = async (event) => {
+
+    const nombreProducto = event.target.value;
+
+    setNombreProducto(nombreProducto);
+
+    try {
+      const url = `http://localhost:5000/api/ProductoPrecioVenta?nombre=${nombreProducto}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      setPrecio(data.precio);
+    } catch (error) {
+      console.error("Error en la petición:", error);
+    }
+
   };
 
   const handleIdCantidadChange = (event) => {
     setCantidad(event.target.value);
   };
+
+  
 
   const obtenerClientes = async () => {
     try {
@@ -64,7 +84,7 @@ export const Ventas = () => {
 
     try {
       const clienteSeleccionado = clientes.find(
-        (cliente) => cliente.IdCliente === parseInt(idCliente)
+        (cliente) => cliente.NombreCliente === nombreCliente
       );
       // Veririficar si existe el cliente
       if (!clienteSeleccionado) {
@@ -76,8 +96,8 @@ export const Ventas = () => {
         // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
         setTimeout(() => {
           setMensajeError("");
-          setIdProducto("");
-          setIdCliente("");
+          setNombreProducto("");
+          setNombreCliente("");
           setCantidad("");
           setMostrarAlertaError(false);
         }, 3000);
@@ -86,7 +106,7 @@ export const Ventas = () => {
 
       // Obtener el stock del producto seleccionado
       const productoSeleccionado = productos.find(
-        (producto) => producto.IdProducto === parseInt(idProduct)
+        (producto) => producto.Nombre === nombreProducto
       );
 
       // Verificar si el producto existe
@@ -99,8 +119,8 @@ export const Ventas = () => {
         // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
         setTimeout(() => {
           setMensajeError("");
-          setIdProducto("");
-          setIdCliente("");
+          setNombreProducto("");
+          setNombreCliente("");
           setCantidad("");
           setMostrarAlertaError(false);
         }, 3000);
@@ -117,8 +137,8 @@ export const Ventas = () => {
         setMostrarAlertaExitosa(false);
         setTimeout(() => {
           setMensajeError("");
-          setIdProducto("");
-          setIdCliente("");
+          setNombreProducto("");
+          setNombreCliente("");
           setCantidad("");
           setMostrarAlertaError(false);
         }, 3000);
@@ -130,24 +150,21 @@ export const Ventas = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          idProduct,
-          idCliente,
-          cantidad,
-        }),
+        body: JSON.stringify({ nombreProducto, nombreCliente, cantidad, totalIngreso }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         // Venta exitosa
+        Swal.fire('Realizaciòn de Venta', 'Venta realizada correctamente', 'success')
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
 
         // Actualizar el stock en la lista de productos
         const stockActualizado = stockDisponible - cantidad;
         const productoIndex = productos.findIndex(
-          (producto) => producto.IdProducto === parseInt(idProduct)
+          (producto) => producto.NombreProducto === nombreProducto
         );
         if (productoIndex !== -1) {
           productos[productoIndex].Stock = stockActualizado;
@@ -159,14 +176,15 @@ export const Ventas = () => {
 
           // Verificar si el stock es menor o igual a 10
           if (stockActualizado <= 10) {
+            Swal.fire('Informaciòn de Stock', 'Necesitas comprar mas productos', 'warning')
             setMensajeError("¡Necesitas comprar más productos!");
             setMostrarAlertaError(true);
             setMensajeExitoso("");
             setMostrarAlertaExitosa(false);
             setTimeout(() => {
               setMensajeError("");
-              setIdProducto("");
-              setIdCliente("");
+              setNombreProducto("");
+              setNombreCliente("");
               setCantidad("");
               setMostrarAlertaError(false);
             }, 3000);
@@ -174,8 +192,8 @@ export const Ventas = () => {
         }, 3000);
 
         // Limpiar los campos de entrada después de crear la venta
-        setIdProducto("");
-        setIdCliente("");
+        setNombreProducto("");
+        setNombreCliente("");
         setCantidad("");
         setMensajeError("");
         setMostrarAlertaError(false);
@@ -242,6 +260,7 @@ export const Ventas = () => {
       console.error(error);
     }
   };
+
   useEffect(() => {
     obtenerClientes();
     obtenerProductos();
@@ -347,12 +366,14 @@ export const Ventas = () => {
     doc.save("ventas.pdf");
   };
 
+  const totalIngreso = cantidad * precio;
+
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-2 p-50">
-        <div className="p-20">
-          <h2 className="font-bold">Generar venta</h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-2 p-10">
+        <div className="md:col-span-1 col-span-1 bg-white p-5 rounded-lg shadow-lg">
+          <h2 className="font-semibold text-xl mb-6">Generar venta</h2>
 
           {mostrarAlertaExitosa && (
             <div
@@ -399,10 +420,10 @@ export const Ventas = () => {
               </div>
             </div>
           )}
-          <form onSubmit={handleFormSubmit} className="p-10">
+          <form onSubmit={handleFormSubmit}>
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="country"
               >
                 Cliente
@@ -411,20 +432,20 @@ export const Ventas = () => {
                 required
                 id="country"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                value={idCliente}
-                onChange={handleIdClienteChange}
+                value={nombreCliente}
+                onChange={handleNombreClienteChange}
               >
-                <option>-- Selecciona un cliente --</option>
+                <option>-- Selecciona un Cliente --</option>
                 {clientes.map((cliente) => (
-                  <option value={cliente.IdCliente} key={cliente.IdCliente}>
-                    {`#${cliente.IdCliente}`} - {cliente.NombreCliente}
+                  <option value={cliente.NombreCliente} key={cliente.IdCliente}>
+                    {cliente.NombreCliente}
                   </option>
                 ))}
               </select>
             </div>
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="city"
               >
                 Producto
@@ -432,22 +453,34 @@ export const Ventas = () => {
               <select
                 id="city"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                value={idProduct}
-                onChange={handleIdProductoChange}
+                value={nombreProducto}
+                onChange={handleNombreProductoChange}
                 required
               >
                 <option>-- Selecciona una producto --</option>
                 {productos.map((producto) => (
-                  <option value={producto.IdProducto} key={producto.IdProducto}>
-                    {`#${producto.IdProducto}`} - {producto.Nombre}
+                  <option value={producto.Nombre} key={producto.IdProducto}>
+                    {producto.Nombre}
                   </option>
                 ))}
               </select>
             </div>
-
             <div className="mb-4">
               <label
-                className="block text-gray-700 font-bold mb-2"
+                className="block text-gray-700 font-semibold mb-2"
+                htmlFor="name"
+              >
+                Precio Compra
+              </label>
+              <input
+                type="number"
+                value={precio}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 font-semibold mb-2"
                 htmlFor="name"
               >
                 Cantidad
@@ -463,29 +496,40 @@ export const Ventas = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>
+            <div className="mb-8">
+              <label
+                className="block text-gray-700 font-semibold mb-2"
+                htmlFor="name"
+              >
+                Total a Pagar
+              </label>
+              <input
+                value={totalIngreso}
+                type="number"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            </div>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-green-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full"
             >
-              Enviar
+              Realizar Venta
             </button>
           </form>
         </div>
 
-        <div className="p-20">
-          <h2 className="font-bold">Generar Reporte de Ventas</h2>
-          <div className="App-page mt-4">
+        <div className="md:col-span-3 bg-white p-5 rounded-lg shadow-lg overflow-y-auto">
+          <h2 className="font-semibold text-xl">Generar Reporte de Ventas</h2>
+          <div className="App-page mt-2">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="mb-4">
-                {" "}
-                {/* //className="App-form" */}
-                <div className="flex">
-                  <div className="mr-4">
+              <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center">
+                <div className="flex flex-wrap items-center justify-center">
+                  <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
                     <label
-                      className="block text-gray-700 font-bold mb-2"
+                      className="block text-gray-700 font-semibold mb-2"
                       htmlFor="startDate"
                     >
-                      Fecha de inicio:
+                      Fecha de inicio
                       <input
                         type="date"
                         value={fechaInicio}
@@ -496,66 +540,90 @@ export const Ventas = () => {
                       {/* className="App-input" */}
                     </label>
                   </div>
-                  <label
-                    className="block text-gray-700 font-bold mb-2"
-                    htmlFor="endDate"
-                  >
-                    Fecha de fin:
-                    <input
-                      type="date"
-                      value={fechaFin}
-                      onChange={(e) => setFechaFin(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 "
-                      required
-                    />
-                  </label>{" "}
-                  {/* className="App-input" */}
+                  <div className="w-full lg:w-1/4 mb-2 sm:mr-4">
+                    <label
+                      className="block text-gray-700 font-semibold mb-2"
+                      htmlFor="endDate"
+                    >
+                      Fecha de fin
+                      <input
+                        type="date"
+                        value={fechaFin}
+                        onChange={(e) => setFechaFin(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 "
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div className="flex mt-2 items-center justify-center gap-2">
+                    <button
+                      type="submit"
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                    >
+                      Generar reporte
+                    </button>
+                    <button
+                      onClick={handleDownloadPDF}
+                      id="btnPdf"
+                      type="button"
+                      download="ventas.pdf"
+                      className="bg-blue-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded ms-5"
+                    >
+                      Generar pdf
+                    </button>
+                  </div>
                 </div>
-                <br />
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt--6"
-                >
-                  Generar reporte
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  id="btnPdf"
-                  type="button"
-                  download="ventas.pdf"
-                  className="bg-blue-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt--6 ms-5"
-                >
-                  Generar pdf
-                </button>
               </form>
               {/* <div style={{ maxHeight: "400px", overflowY: "auto" }}> */}
               {reporteVentas.length > 0 ? (
-                <table className="App-auto" id="table">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2 border-m-2">IdSalida</th>
-                      <th className="px-4 py-2">IdProducto</th>
-                      <th className="px-4 py-2">IdCliente</th>
-                      <th className="px-4 py-2">Cantidad</th>
-                      <th className="px-4 py-2">FechaSalida</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reporteVentas.map((venta) => (
-                      <tr key={venta.IdSalida}>
-                        <td className="border px-4 py-2">{venta.IdSalida}</td>
-                        <td className="border px-4 py-2 ">
-                          {venta.IdProducto}
-                        </td>
-                        <td className="border px-4 py-2 ">{venta.IdCliente}</td>
-                        <td className="border px-4 py-2 ">{venta.Cantidad}</td>
-                        <td className="border px-4 py-2 ">
-                          {venta.FechaSalida}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="App-auto" id="table">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
+                      <tr>
+                        <th scope="col" className="py-3">#</th>
+                        <th scope="col" className="px-6 py-3">Producto</th>
+                        <th scope="col" className="px-6 py-3">Cliente</th>
+                        <th scope="col" className="px-6 py-3">Cantidad</th>
+                        <th scope="col" className="px-6 py-3">Total Venta</th>
+                        <th scope="col" className="px-6 py-3">Fecha Salida</th>
+                        <th scope="col" className="px-6 py-3">Acciones</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {reporteVentas.map((venta) => (
+                        <tr key={venta.IdSalida}>
+                          <td className="border px-4 py-2">{venta.IdSalida}</td>
+                          <td className="border px-4 py-2 ">
+                            {venta.NombreProducto}
+                          </td>
+                          <td className="border px-4 py-2 ">{venta.NombreCliente}</td>
+                          <td className="border px-4 py-2 ">{venta.Cantidad}</td>
+                          <td className="border px-4 py-2 ">{venta.TotalDineroIngresado} C$</td>
+                          <td className="border px-4 py-2 ">
+                            {venta.FechaSalida}
+                          </td>
+                          <td className="border px-6 py-4 flex items-center justify-center">
+                            <button
+                              className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              // este funciona
+                              // onClick={() => {
+                              //   setCompraSeleccionada(compra);
+                              //   abrirConfirmModal();
+                              // }}
+                           
+                            >
+                              <IoMdTrash className="w-15" />
+                            </button>
+
+                            <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              <BiEdit className="w-15" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : null}
               {/* </div> */}
 

@@ -1,19 +1,26 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
+import { IoMdTrash } from 'react-icons/io';
+import { BiEdit } from "react-icons/bi";
 
-export const CardsProductos = ({nombre, descripcion, stock, id}) => {
+export const CardsProductos = ({ nombre, descripcion, stock, id, precioC, precioV }) => {
     return (
-        <div className="w-60 m-5 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex flex-col items-center pb-10">
-                <h2 className="mt-8 text-md font-medium text-gray-900 dark:text-white">Id: {id}</h2>
-                <h2 className="mb-1 text-md font-medium text-gray-900 dark:text-white">Producto: {nombre}</h2>
-                <h2 className="mb-1 text-xl font-medium text-gray-900 dark:text-white">Stock: {stock}</h2>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{descripcion}</span>
-                <div className="flex mt-4 space-x-3 md:mt-6">
-                    <Link  className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Editar</Link>
-                    <Link  className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">Eliminar</Link>
-                </div>
-            </div>
-        </div>
+        <tbody>
+            <tr>
+                <td className="border px-6 py-4 text-center">{id}</td>
+                <td className="border px-6 py-4">{nombre}</td>
+                <td className="border px-6 py-4">{descripcion}</td>
+                <td className="border px-6 py-4 text-center">{stock}</td>
+                <td className="border px-6 py-4 text-center">{precioC} C$</td>
+                <td className="border px-6 py-4 text-center">{precioV} C$</td>
+                <td className="border px-5 py-3 flex items-center justify-center">
+                    <button className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <IoMdTrash  className='w-15' />
+                    </button>
+                    <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <BiEdit  className='w-15' />
+                    </button>
+                </td>
+            </tr>
+        </tbody>
     )
 }

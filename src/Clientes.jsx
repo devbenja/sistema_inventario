@@ -119,95 +119,94 @@ export const Clientes = () => {
     }, [cardUpdate]);
 
     return (
-        <div>
-            <>
-                {
-                    isOpen && (
-                        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto">
-                                <h2 className="text-xl font-semibold mb-10">Crear Cliente</h2>
-                                {mostrarAlertaExitosa && (
-                                    <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
-                                        <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                                        <div>
-                                            <span className="font-medium">{mensajeExitoso}</span>
-                                        </div>
-                                    </div>
-                                )}
 
-                                {mostrarAlertaError && (
+        <>
+            {
+                isOpen && (
+                    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
+                        <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto">
+                            <h2 className="text-xl font-semibold mb-10">Crear Cliente</h2>
+                            {mostrarAlertaExitosa && (
+                                <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
+                                    <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <div>
+                                        <span className="font-medium">{mensajeExitoso}</span>
+                                    </div>
+                                </div>
+                            )}
 
-                                    <div className="mt-5 flex bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
-                                        <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                                        <div>
-                                            <span className="font-medium">{mensajeError}</span>
-                                        </div>
+                            {mostrarAlertaError && (
+
+                                <div className="mt-5 flex bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
+                                    <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <div>
+                                        <span className="font-medium">{mensajeError}</span>
                                     </div>
-                                )}
-                                <form onSubmit={handleFormSubmit}>
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre</label>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            value={nombreCliente}
-                                            onChange={handleNombreClienteChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-7">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono</label>
-                                        <input
-                                            type="text"
-                                            id="email"
-                                            value={telefonoCliente}
-                                            onChange={handleTelefonoClienteChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-7">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Correo</label>
-                                        <input
-                                            type="text"
-                                            id="email"
-                                            value={correoCliente}
-                                            onChange={handleCorreoClienteChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-7">
-                                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Direccion</label>
-                                        <input
-                                            type="text"
-                                            id="email"
-                                            value={direccionCliente}
-                                            onChange={handleDireccionClienteChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <div className="flex flex-wrap gap-3 sm:justify-center lg:justify-end">
-                                        <button
-                                            type="submit"
-                                            className="mr-3 bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                        >
-                                            Crear
-                                        </button>
-                                        <button
-                                            className="bg-gray-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-                                            onClick={closeModal}
-                                        >
-                                            Cerrar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                                </div>
+                            )}
+                            <form onSubmit={handleFormSubmit}>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="name">Nombre</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        value={nombreCliente}
+                                        onChange={handleNombreClienteChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-7">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Telefono</label>
+                                    <input
+                                        type="text"
+                                        id="email"
+                                        value={telefonoCliente}
+                                        onChange={handleTelefonoClienteChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-7">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Correo</label>
+                                    <input
+                                        type="text"
+                                        id="email"
+                                        value={correoCliente}
+                                        onChange={handleCorreoClienteChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-7">
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Direccion</label>
+                                    <input
+                                        type="text"
+                                        id="email"
+                                        value={direccionCliente}
+                                        onChange={handleDireccionClienteChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="flex flex-wrap gap-3 sm:justify-center lg:justify-end">
+                                    <button
+                                        type="submit"
+                                        className="mr-3 bg-green-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                                    >
+                                        Crear
+                                    </button>
+                                    <button
+                                        className="bg-gray-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+                                        onClick={closeModal}
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
+                    </div>
 
-                    )
-                }
-            </>
-            <Header />
-            <div className="border p-10">
+                )
+            }
+            <Header/>
+            <div className="border p-10 ">
                 <div className="flex flex-wrap gap-5 justify-around items-center mb-4 w-full">
                     <p className="text-xl font-medium">Clientes</p>
                     <div className="flex gap-5 justify-around flex-wrap items-center border">
@@ -221,7 +220,7 @@ export const Clientes = () => {
                             </div>
                         </form>
                         <button
-                            className=" ml-5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="font-semibold ml-5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             onClick={openModal}
                         >
                             Crear Cliente
@@ -237,8 +236,8 @@ export const Clientes = () => {
                             <th scope="col" className="px-6 py-3">Codigo</th>
                             <th scope="col" className="px-6 py-3">Nombre</th>
                             <th scope="col" className="px-6 py-3">Telefono</th>
-                            <th scope="col" className="px-6 py-3">Correo</th>
                             <th scope="col" className="px-6 py-3">Direcciòn</th>
+                            <th scope="col" className="px-6 py-3">Correo</th>                            
                             <th scope="col" className="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
@@ -256,6 +255,8 @@ export const Clientes = () => {
                     }
                 </table>
             </div>
-        </div>
+        </>
+
+
     )
 }

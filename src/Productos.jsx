@@ -6,6 +6,8 @@ export const Productos = () => {
 
     const [nombreProducto, setNombreProducto] = useState('');
     const [descripcion, setDescripcion] = useState('');
+    const [precioCompra, setPrecioCompra] = useState('');
+    const [precioVenta, setPrecioVenta] = useState('');
     const [productos, setProductos] = useState([0]);
     const [mensajeExitoso, setMensajeExitoso] = useState('');
     const [mensajeError, setMensajeError] = useState('');
@@ -32,6 +34,15 @@ export const Productos = () => {
         setDescripcion(event.target.value);
     };
 
+    const handlePrecioCompraChange = (event) => {
+        setPrecioCompra(event.target.value);
+    };
+
+    const handlePrecioVentaChange = (event) => {
+        setPrecioVenta(event.target.value);
+    };
+
+
     // Esta funcion manda los datos en la peticion post
     const handleFormSubmit = async (event) => {
         event.preventDefault();
@@ -42,7 +53,7 @@ export const Productos = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ nombreProducto, descripcion })
+                body: JSON.stringify({ nombreProducto, descripcion, precioCompra, precioVenta })
             });
 
             var data = await response.json();
@@ -53,6 +64,8 @@ export const Productos = () => {
                 // Limpiar los campos de entrada después de crear el usuario
                 setNombreProducto('');
                 setDescripcion('');
+                setPrecioCompra('');
+                setPrecioVenta('');
                 setMensajeError('');
                 setMostrarAlertaError(false);
 
@@ -98,7 +111,7 @@ export const Productos = () => {
                 {
                     isOpen && (
                         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 modal-backdrop bg-black bg-opacity-50">
-                            <div className="bg-white p-8 rounded-lg shadow-lg w-1/3 mx-auto mb-60">
+                            <div className="bg-white p-8 rounded-lg shadow-lg w-2/5 mx-auto">
                                 <h2 className="text-xl font-semibold mb-10">Crear Producto</h2>
                                 {mostrarAlertaExitosa && (
                                     <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
@@ -120,7 +133,7 @@ export const Productos = () => {
                                 )}
                                 <form onSubmit={handleFormSubmit}>
                                     <div className="mb-4">
-                                        <label className="block text-gray-700 font-bold mb-2" htmlFor="name">Nombre Producto</label>
+                                        <label className="block text-gray-700 font-semibold mb-2" htmlFor="name">Nombre Producto</label>
                                         <input
                                             type="textarea"
                                             id="name"
@@ -130,7 +143,7 @@ export const Productos = () => {
                                         />
                                     </div>
                                     <div className="mb-7">
-                                        <label className="block text-gray-700 font-bold mb-2" htmlFor="email">Descripcion</label>
+                                        <label className="block text-gray-700 font-semibold mb-2" htmlFor="email">Descripcion</label>
                                         <textarea
                                             type="text"
                                             id="email"
@@ -139,10 +152,30 @@ export const Productos = () => {
                                             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                                         />
                                     </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 font-semibold mb-2" htmlFor="name">Precio Compra</label>
+                                        <input
+                                            type="textarea"
+                                            id="name"
+                                            value={precioCompra}
+                                            onChange={handlePrecioCompraChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 font-semibold mb-2" htmlFor="name">Precio Venta</label>
+                                        <input
+                                            type="textarea"
+                                            id="name"
+                                            value={precioVenta}
+                                            onChange={handlePrecioVentaChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
                                     <div className="flex flex-wrap gap-3 sm:justify-center lg:justify-end">
-                                        <button
+                                        <button                                       
                                             type="submit"
-                                            className="mr-3 bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                            className="mr-3 bg-green-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
                                         >
                                             Crear
                                         </button>
@@ -187,14 +220,25 @@ export const Productos = () => {
                 </div>
             </div>
 
-            <div className='container px-5 py-10 mx-auto'>
-                <div className='flex flex-wrap justify-center w-full'>
+            <div className='container px-5 py-10 mx-auto overflow-x-auto'>
+            <table className=" w-full text-sm text-left text-gray-500 dark:text-gray-400" id="table">
+                    <thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center'>
+                        <tr>
+                            <th scope="col" className="px-6 py-3">Codigo</th>
+                            <th scope="col" className="px-6 py-3">Nombre</th>
+                            <th scope="col" className="px-6 py-3">Descripcion</th>
+                            <th scope="col" className="px-6 py-3">Stock</th>
+                            <th scope="col" className="px-6 py-3">Precio Compra</th>
+                            <th scope="col" className="px-6 py-3">Precio Venta</th>
+                            <th scope="col" className="px-6 py-3">Acciones</th>
+                        </tr>
+                    </thead>
                     {
                         productos.map(producto => (
-                            <CardsProductos key={producto.IdProducto} update={setCardUpdate} id={producto.IdProducto} nombre={producto.Nombre} descripcion={producto.Descripcion} stock={producto.Stock} />
+                            <CardsProductos key={producto.IdProducto} update={setCardUpdate} id={producto.IdProducto} nombre={producto.Nombre} descripcion={producto.Descripcion} stock={producto.Stock} precioC={producto.PrecioCompra} precioV ={producto.PrecioVenta}/>
                         ))
                     }
-                </div>
+                </table>
             </div>
 
         </div>
