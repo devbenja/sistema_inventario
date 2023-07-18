@@ -74,7 +74,7 @@ function App() {
             path="/Ventas"
             element={
               <ProtecteRoute>
-                <Compras />
+                <Ventas />
               </ProtecteRoute>
             }
           />
