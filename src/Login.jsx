@@ -1,145 +1,198 @@
-import { React, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
-import 'react-toastify/dist/ReactToastify.css';
+import { useState, useEffect } from "react";
+import { useAuth } from "./context/authContext";
+import { Link, useNavigate } from "react-router-dom";
+import { Alert } from "./components/Alert";
+import { fetchSignInMethodsForEmail, getAuth } from "firebase/auth";
 
+import booksLibre from "./assets/booksLibre.jpg";
 
-export const Login = () => {
+export function Login() {
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+  const { login, logingWithGoogle, resetPassword } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-    const navigate = useNavigate();
-    const [nombreUsuario, setNombreUsuario] = useState('');
-    const [contrasena, setContrasena] = useState('');
-    const [mensaje, setMensaje] = useState('');
-    const [mostrarAlerta, setMostrarAlerta] = useState(false);
-    const [wrong, setWrong] = useState(false);
+  const handleChange = ({ target: { name, value } }) => {
+    setUser({ ...user, [name]: value });
+  };
 
-    const handleNombreUsuarioChange = (event) => {
-        setNombreUsuario(event.target.value);
-    };
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+        navigate("/Home");
+      }, 1000);
 
-    const handleContrasenaChange = (event) => {
-        setContrasena(event.target.value);
-    };
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate]);
 
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
+  useEffect(() => {
+    if (error) {
+      const errorTimer = setTimeout(() => {
+        setError("");
+      }, 3000);
 
-        try {
-            const response = await fetch('http://localhost:5000/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ nombreUsuario, contrasena })
-            });
+      return () => clearTimeout(errorTimer);
+    }
+  }, [error]);
 
-            const data = await response.json();
-            const usuario = {nombreUsuario, contrasena}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(""); // Limpia el error anterior
 
-            if (response.ok) {
-                console.log(usuario);
-                setMensaje(data.mensaje);
-                setMostrarAlerta(true);
-                setTimeout(() => {
-                    navigate("/Inicio");
-                }, 2000);
-                setWrong(false)
-            } else {
-                setMensaje(data.mensaje);
-                setWrong(true);
-            }
-        } catch (error) {
-            console.log(error);
-            setMensaje('Error de conexiòn');
-        }
-    };
+    // Frontend validation
+    if (!user.email) {
+      setError("Please enter your email");
+      return;
+    }
+    if (!user.password) {
+      setError("Please enter your password.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      setError("Invalid email format. Please enter a valid email address.");
+      return;
+    }
 
+    // Verificar que la contraseña tenga al menos 6 caracteres
+    if (user.password.length < 6) {
+      setError("Password should be at least 6 characters long.");
+      return;
+    }
 
-    return (
-        <>
-            <div className="flex min-h-full flex-1 flex-col justify-center px-20 py-20 mt-20 lg:px-8">
+    // validaciones de firebase
 
-                <div className="sm:mx-auto sm:w-full  sm:max-w-sm">
-                    <img
-                        className="mx-auto h-10 w-auto"
-                        src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                        alt="Your Company"
-                    />
-                    <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                        Iniciar Sesion
-                    </h2>
-                </div>
+    try {
+      const auth = getAuth();
+      const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
+      if (signInMethods.length === 0) {
+        setError("User not found. Please check your email or register.");
+        return;
+      }
 
-                <div className="mt-7 sm:mx-auto sm:w-full sm:max-w-sm">
-                    {wrong && (
-                        <div className='space-y-2 mb-2'>
-                            <div class="flex gap-2 p-2 alert text-red-700 bg-red-100" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-                                {mensaje}
-                            </div>
-                        </div>
-                    )}
-                    <form onSubmit={handleFormSubmit} className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                                Usuario
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    value={nombreUsuario}
-                                    onChange={handleNombreUsuarioChange}
-                                    id="email"
-                                    name="email"
-                                    type="text"
-                                    autoComplete="email"
-                                    required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
+      await login(user.email, user.password);
+      setSuccessMessage("Login sucessful");
 
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                    Contraseña
-                                </label>
-                            </div>
-                            <div className="mt-2">
-                                <input
-                                    value={contrasena}
-                                    onChange={handleContrasenaChange}
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
+      // navigate("/Home");
+      setError();
+    } catch (error) {
+      const errorMessage =
+        getErrorMessage(error.code) ||
+        "An error occurred while trying to log in. Please try again.";
+      setError(errorMessage);
+    }
+  };
+  const handleGoogleSignin = async () => {
+    try {
+      await logingWithGoogle();
+      navigate("/");
+    } catch (error) {
+      setError(error.error);
+    }
+  };
 
-                        <div>
-                            <button
-                                type="submit"
-                                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                            >
-                                Ingresar
-                            </button>
-                        </div>
-                    </form>
+  const handleResetPassword = async () => {
+    if (!user.email) {
+      setError("Please enter your email");
+      return;
+    }
+    try {
+      await resetPassword(user.email);
+      setError("We sent you an email with a link to reset your password");
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
-                    {mostrarAlerta && (
+  const getErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case "auth/invalid-email":
+        return "Invalid email. Please enter a valid email address.";
+      case "auth/wrong-password":
+        return "Incorrect password. Please enter the correct password22.";
+      case "auth/user-not-found":
+        return "User not found. Please check your email or register.";
+      case "auth/weak-password":
+        return "Password is too weak. Please enter a stronger password.";
+      case "auth/email-already-in-use":
+        return "This email is already registered. Please try another one.";
+      default:
+        return null;
+    }
+  };
 
-                        <div className='space-y-2 mt-5'>
-                            <div class="flex gap-2 p-2 alert text-green-800 bg-green-100" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                {mensaje}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </>
-    )
-}
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 h-screen w-full">
+      <div className="hidden sm:block ">
+        <img
+          className="w-full h-full object-cover"
+          src={booksLibre}
+          alt="Logo"
+        />
+      </div>
 
-Login.defaultProps = {
-    nombre: "BENTA",
+      <div className="bg-custom flex flex-col items-center justify-center">
+        {error && <Alert message={error} />}
+        {successMessage && <Alert type="success" message={successMessage} />}
+
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-[400px] w-full mx-auto rounded-lg bg-gray-800 p-8 px-8"
+        >
+          <h2 className="text-4xl text-white font-bold text-center">SIGN IN</h2>
+          <div className="flex flex-col text-gray-400 py-2">
+            <label htmlFor="email">Email</label>
+            <input
+              className="p-2 rounded-lg bg-gray-700 mt-2 focus:border-blue-500 focus:bg-gray-800 focus:outline-none"
+              type="text"
+              name="email"
+              onChange={handleChange}
+              placeholder="example@gmail.com"
+            />
+          </div>
+          <div className="flex flex-col text-gray-400 py-2">
+            <label htmlFor="password">Password</label>
+            <input
+              className="p-2 rounded-lg bg-gray-700 mt-2 focus:border-blue-500 focus:bg-gray-800 focus:outline-none"
+              type="password"
+              name="password"
+              id="password"
+              onChange={handleChange}
+              placeholder="******"
+            />
+          </div>
+          <div className="flex justify-between items-center text-gray-400">
+            <button className="w-1/2 my-5 py-2 bg-blue-500 shadow-lg  text-white font-semibold rounded-lg hover:bg-blue-700">
+              SIGNIN
+            </button>
+            <a
+              href="#"
+              className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+              onClick={handleResetPassword}
+            >
+              Forgot Password?
+            </a>
+          </div>
+        </form>
+        <p className="max-w-[400px] flex justify-between w-full mx-auto rounded-lg bg-gray-800 p-8 px-8  text-white mt-4 py-4 ">
+          Don't have an account?
+          <Link to="/Register" className="text-blue-500 hover:text-blue-800 ">
+            Register
+          </Link>
+        </p>
+        <button
+          onClick={handleGoogleSignin}
+          className="max-w-[400px] w-full mx-auto rounded-lg bg-gray-800 p-8 px-8 text-white mt-4 py-4  hover:bg-blue-700 "
+        >
+          Login with Google
+        </button>
+      </div>
+    </div>
+  );
 }

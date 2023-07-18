@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "./App.css";
 import { IoMdTrash } from "react-icons/io";
-import { BiEdit } from "react-icons/bi";
+import { FiFile } from "react-icons/fi";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -70,7 +70,6 @@ export const Compras = () => {
     } catch (error) {
       console.error("Error en la petición:", error);
     }
-
   };
 
   const handleIdCantidadChange = (event) => {
@@ -169,7 +168,11 @@ export const Compras = () => {
       var data = await response.json();
 
       if (response.ok) {
-        Swal.fire('Realizaciòn de compra', 'Compra realizada correctamente', 'success')
+        Swal.fire(
+          "Realizaciòn de compra",
+          "Compra realizada correctamente",
+          "success"
+        );
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
         // Limpiar los campos de entrada después de crear el usuario
@@ -577,10 +580,15 @@ export const Compras = () => {
           </form>
         </div>
         <div className="md:col-span-3 bg-white p-5 rounded-lg shadow-lg overflow-y-auto">
-          <h2 className="font-semibold text-xl mb-6">Generar Reporte de Compras</h2>
+          <h2 className="font-semibold text-xl mb-6">
+            Generar Reporte de Compras
+          </h2>
           <div className="App-page mt-4">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center">
+              <form
+                onSubmit={handleSubmit}
+                className="p-5 flex items-center justify-center"
+              >
                 <div className="flex flex-wrap items-center justify-center">
                   <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
                     <label
@@ -594,7 +602,7 @@ export const Compras = () => {
                         onChange={(e) => setFechaInicio(e.target.value)}
                         className="w-full px-4 uppercase py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                         required
-                      />           
+                      />
                     </label>
                   </div>
                   <div className="w-full lg:w-1/4 mb-2 sm:mr-4">
@@ -666,7 +674,7 @@ export const Compras = () => {
                         <tr
                           key={compra.IdEntrada}
                           compra={compra}
-                        // eliminarCompra={eliminarCompra}
+                          // eliminarCompra={eliminarCompra}
                         >
                           <td className="border px-4 py-2 text-center">
                             {compra.IdEntrada}
@@ -678,7 +686,7 @@ export const Compras = () => {
                             {compra.NombreProveedor}
                           </td>
                           <td className="border px-4 py-2 text-center">
-                            {compra.Cantidad} 
+                            {compra.Cantidad}
                           </td>
                           <td className="border px-4 py-2 text-center">
                             {compra.TotalDineroGastado} C$
@@ -689,18 +697,13 @@ export const Compras = () => {
                           <td className="border px-6 py-4 flex items-center justify-center">
                             <button
                               className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              // este funciona
-                              // onClick={() => {
-                              //   setCompraSeleccionada(compra);
-                              //   abrirConfirmModal();
-                              // }}
                               onClick={() => eliminarCompra(compra.IdEntrada)}
                             >
                               <IoMdTrash className="w-15" />
                             </button>
 
                             <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <BiEdit className="w-15" />
+                              <FiFile className="w-15" />
                             </button>
                           </td>
                         </tr>
@@ -727,9 +730,9 @@ export const Compras = () => {
                 </button>
               </Modal>
             </div>
-          </div>         
+          </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
