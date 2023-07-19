@@ -219,6 +219,10 @@ export const Compras = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const fechaFinAjustada = new Date(fechaFin);
+    fechaFinAjustada.setDate(fechaFinAjustada.getDate());
+    fechaFinAjustada.setHours(0, 0, 0, 0);
+
     try {
       const response = await fetch(
         "http://localhost:5000/api/reporte-compras",
@@ -227,26 +231,35 @@ export const Compras = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ fechaInicio, fechaFin }),
+          body: JSON.stringify({
+            fechaInicio,
+            fechaFin: fechaFinAjustada.toISOString(),
+          }),
         }
       );
-      console.log(response); // Imprime la respuesta completa del servidor en la consola del navegador
+
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Imprime los datos de la respuesta del servidor en la consola del navegador
+        console.log(data);
         if (data.length === 0) {
-          setModalVisible2(true);
+          // Mostrar SweetAlert con el mensaje de advertencia
+          Swal.fire({
+            icon: "warning",
+            title: "No se encontraron registros",
+            // text: "No hay registros para la fecha seleccionada.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "OK",
+          });
         } else {
-          setReporteCompras(data);
+          setCompras(data);
         }
       } else {
-        console.error("Error al generar el reporte de ventas");
+        console.error("Error al generar el reporte de compras");
       }
     } catch (error) {
       console.error(error);
     }
   };
-
   const actualizarCompras = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/Entradas");
