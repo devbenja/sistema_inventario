@@ -158,12 +158,7 @@ export const Compras = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          nombreProducto,
-          nombreProveedor,
-          cantidad,
-          totalEgreso,
-        }),
+        body: JSON.stringify({ nombreProducto, nombreProveedor, cantidad, precio , subtotal, total, iva }),
       });
 
       var data = await response.json();
@@ -359,7 +354,11 @@ export const Compras = () => {
     doc.save("compras.pdf");
   };
 
-  const totalEgreso = cantidad * precio;
+  const subtotal = cantidad * precio;
+
+  const iva = subtotal * 0.15;
+
+  const total = subtotal + iva;
 
   const eliminarCompra = async (idCompra) => {
     try {
@@ -428,7 +427,7 @@ export const Compras = () => {
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-2 p-10">
+      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-1 p-5">
         <div className="md:col-span-1 col-span-1 bg-white p-5 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-6">Generar compra</h2>
           {mostrarAlertaExitosa && (
@@ -554,19 +553,33 @@ export const Compras = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
-
-            <div className="mb-8">
-              <label
-                className="block text-gray-700 font-semibold mb-2"
-                htmlFor="name"
-              >
-                Total a Pagar
-              </label>
-              <input
-                value={totalEgreso}
-                type="number"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
+            <div className="flex gap-2">
+              <div className="mb-8">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="name"
+                >
+                  Subtotal
+                </label>
+                <input
+                  value={subtotal}
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="mb-8">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="name"
+                >
+                  Total
+                </label>
+                <input
+                  value={total}
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
             </div>
             <button
               type="submit"
@@ -594,7 +607,7 @@ export const Compras = () => {
                         onChange={(e) => setFechaInicio(e.target.value)}
                         className="w-full px-4 uppercase py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                         required
-                      />           
+                      />
                     </label>
                   </div>
                   <div className="w-full lg:w-1/4 mb-2 sm:mr-4">
@@ -634,28 +647,37 @@ export const Compras = () => {
               {/* se esta modificando para que contenga las compras asi estaba: reporteCompras */}
               {compras.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="App-auto" id="table">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
+                  <table className="App-auto w-full" id="table">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center border">
                       <tr>
-                        <th scope="col" className="py-3">
-                          # Compra
+                        <th scope="col" className="py-3 border">
+                          #
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th scope="col" className="px-5 py-3 border">
                           Producto
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th scope="col" className="px-7 py-3 border">
                           Proveedor
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th scope="col" className="px-2 py-2 border">
                           Cantidad
                         </th>
-                        <th scope="col" className="px-6 py-3">
-                          Total Gastado
+                        <th scope="col" className="px-2 py-2 border">
+                          Precio
                         </th>
-                        <th scope="col" className="px-6 py-3">
-                          Fecha Entrada
+                        <th scope="col" className="py-2 px-3 border">
+                          Subtotal
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th scope="col" className="py-2 px-4 border">
+                          IVA
+                        </th>
+                        <th scope="col" className="px-6 py-3 border">
+                          Total
+                        </th>
+                        <th scope="col" className="px-6 py-3 border">
+                          Fecha Compra
+                        </th>
+                        <th scope="col" className="px-6 py-3 border">
                           Acciones
                         </th>
                       </tr>
@@ -678,17 +700,28 @@ export const Compras = () => {
                             {compra.NombreProveedor}
                           </td>
                           <td className="border px-4 py-2 text-center">
-                            {compra.Cantidad} 
+                            {compra.Cantidad}
                           </td>
+                          <td className="border px-4 py-2 text-center">
+                            {compra.PrecioCompra}
+                          </td>
+                          <td className="border px-4 py-2 text-center">
+                            {compra.SubtotalCompra} C$
+                          </td>
+                          
                           <td className="border px-4 py-2 text-center">
                             {compra.TotalDineroGastado} C$
                           </td>
-                          <td className="border px-4 py-2">
-                            {compra.FechaEntrada}
+
+                          <td className="border px-2 py-2 text-center">
+                            {compra.IVA} C$
                           </td>
-                          <td className="border px-6 py-4 flex items-center justify-center">
+                          <td className="border px-4 py-2 text-center">
+                            {new Date (compra.FechaEntrada).toLocaleDateString()}
+                          </td>
+                          <td className="border px-5 py-4 flex items-center justify-center">
                             <button
-                              className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="flex items-center bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                               // este funciona
                               // onClick={() => {
                               //   setCompraSeleccionada(compra);
@@ -727,7 +760,7 @@ export const Compras = () => {
                 </button>
               </Modal>
             </div>
-          </div>         
+          </div>
         </div>
       </div>
     </div >

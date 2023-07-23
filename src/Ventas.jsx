@@ -57,7 +57,7 @@ export const Ventas = () => {
     setCantidad(event.target.value);
   };
 
-  
+
 
   const obtenerClientes = async () => {
     try {
@@ -150,7 +150,7 @@ export const Ventas = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nombreProducto, nombreCliente, cantidad, totalIngreso }),
+        body: JSON.stringify({ nombreProducto, nombreCliente, cantidad, totalMasIva, subtotal, precio,  iva}),
       });
 
       const data = await response.json();
@@ -366,12 +366,16 @@ export const Ventas = () => {
     doc.save("ventas.pdf");
   };
 
-  const totalIngreso = cantidad * precio;
+  const subtotal = cantidad * precio;
+
+  const iva = subtotal * 0.15;
+
+  const totalMasIva = subtotal + iva;
 
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-2 p-10">
+      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-1 p-5">
         <div className="md:col-span-1 col-span-1 bg-white p-5 rounded-lg shadow-lg">
           <h2 className="font-semibold text-xl mb-6">Generar venta</h2>
 
@@ -496,18 +500,33 @@ export const Ventas = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>
-            <div className="mb-8">
-              <label
-                className="block text-gray-700 font-semibold mb-2"
-                htmlFor="name"
-              >
-                Total a Pagar
-              </label>
-              <input
-                value={totalIngreso}
-                type="number"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
+            <div className="flex gap-2">
+              <div className="mb-8">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="name"
+                >
+                  Subtotal
+                </label>
+                <input
+                  value={subtotal}
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="name"
+                >
+                  Total
+                </label>
+                <input
+                  value={totalMasIva}
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
             </div>
             <button
               type="submit"
@@ -577,14 +596,17 @@ export const Ventas = () => {
               {/* <div style={{ maxHeight: "400px", overflowY: "auto" }}> */}
               {reporteVentas.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="App-auto" id="table">
+                  <table className="App-auto w-full" id="table">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                       <tr>
                         <th scope="col" className="py-3">#</th>
                         <th scope="col" className="px-6 py-3">Producto</th>
                         <th scope="col" className="px-6 py-3">Cliente</th>
-                        <th scope="col" className="px-6 py-3">Cantidad</th>
-                        <th scope="col" className="px-6 py-3">Total Venta</th>
+                        <th scope="col" className="py-3">Cantidad</th>
+                        <th scope="col" className="px-6 py-3">Precio Venta</th>
+                        <th scope="col" className="px-6 py-3">Subtotal</th>
+                        <th scope="col" className="px-6 py-3">IVA</th>
+                        <th scope="col" className="px-6 py-3">Total</th>                        
                         <th scope="col" className="px-6 py-3">Fecha Salida</th>
                         <th scope="col" className="px-6 py-3">Acciones</th>
                       </tr>
@@ -597,20 +619,23 @@ export const Ventas = () => {
                             {venta.NombreProducto}
                           </td>
                           <td className="border px-4 py-2 ">{venta.NombreCliente}</td>
-                          <td className="border px-4 py-2 ">{venta.Cantidad}</td>
-                          <td className="border px-4 py-2 ">{venta.TotalDineroIngresado} C$</td>
-                          <td className="border px-4 py-2 ">
-                            {venta.FechaSalida}
+                          <td className="border px-4 py-2 text-center">{venta.Cantidad}</td>
+                          <td className="border px-4 py-2 text-center">{venta.PrecioVenta} C$</td>
+                          <td className="border px-4 py-2 text-center">{venta.SubtotalVenta} C$</td>
+                          <td className="border px-4 py-2 ">{venta.IVA} C$</td>
+                          <td className="border px-4 py-2 text-center">{venta.TotalDineroIngresado} C$</td>                          
+                          <td className="border px-4 py-2 text-center">
+                            {new Date (venta.FechaSalida).toLocaleDateString()}
                           </td>
-                          <td className="border px-6 py-4 flex items-center justify-center">
+                          <td className="border px-4 py-2 flex items-center justify-center">
                             <button
-                              className="flex items-center ml-5 bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              // este funciona
-                              // onClick={() => {
-                              //   setCompraSeleccionada(compra);
-                              //   abrirConfirmModal();
-                              // }}
-                           
+                              className="flex items-center bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            // este funciona
+                            // onClick={() => {
+                            //   setCompraSeleccionada(compra);
+                            //   abrirConfirmModal();
+                            // }}
+
                             >
                               <IoMdTrash className="w-15" />
                             </button>
