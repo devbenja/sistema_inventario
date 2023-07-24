@@ -709,7 +709,7 @@ export const Compras = () => {
                             {compra.SubtotalCompra} C$
                           </td>
                           
-                          <td className="border px-4 py-2 text-center">
+                          <td className="border px-2 py-2 text-center">
                             {compra.TotalDineroGastado} C$
                           </td>
 
