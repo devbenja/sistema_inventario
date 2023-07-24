@@ -1,104 +1,162 @@
-import React from 'react'
-import { useState } from 'react';
-import { Header } from './Header';
+import { useState, useEffect } from "react";
+import { useAuth } from "./context/authContext";
+import { Link, useNavigate } from "react-router-dom";
+import { Alert } from "./components/Alert";
+import { getAuth, fetchSignInMethodsForEmail } from "firebase/auth";
 
-export const Register = () => {
+import booksLibre from "./assets/booksLibre.jpg";
 
-    const [nombreUsuario, setNombreUsuario] = useState('');
-    const [contrasena, setContrasena] = useState('');
-    const [mensajeExitoso, setMensajeExitoso] = useState('');
-    const [mensajeError, setMensajeError] = useState('');
-    const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
-    const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+export function Register() {
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState();
+  const [successMessage, setSuccessMessage] = useState("");
 
-    const handleNombreUsuarioChange = (event) => {
-        setNombreUsuario(event.target.value);
-    };
+  const handleChange = ({ target: { name, value } }) => {
+    setUser({ ...user, [name]: value });
+  };
 
-    const handleContrasenaChange = (event) => {
-        setContrasena(event.target.value);
-    };
+  useEffect(() => {
+    if (error) {
+      const errorTimer = setTimeout(() => {
+        setError("");
+      }, 3000);
 
-    const handleFormSubmit = async (event) => {
-        event.preventDefault();
+      return () => clearTimeout(errorTimer);
+    }
+  }, [error]);
 
-        try {
-            const response = await fetch('http://localhost:5000/registro', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ nombreUsuario, contrasena })
-            });
+  useEffect(() => {
+    if (successMessage) {
+      const successTimer = setTimeout(() => {
+        setSuccessMessage("");
+        navigate("/");
+      }, 3000);
 
-            var data = await response.json();
+      return () => clearTimeout(successTimer);
+    }
+  }, [successMessage, navigate]);
 
-            if (response.ok) {
-                setMensajeExitoso(data.mensaje);
-                setMostrarAlertaExitosa(true);
-                // Limpiar los campos de entrada después de crear el usuario
-                setNombreUsuario('');
-                setContrasena('');
-                setMensajeError('');
-                setMostrarAlertaError(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(""); // Limpia el error anterior
 
-                // Ocultara la alerta luego de 3 seg
+    // Frontend validation
+    if (user.email.trim() === "") {
+      setError("Please enter a valid email.");
+      return;
+    }
 
-                setTimeout(() => {
-                    setMostrarAlertaExitosa(false);
-                  }, 3000);
-            } else {
-                setMensajeError(data.mensaje);
-                setMostrarAlertaError(true);
-                setMensajeExitoso('');
-                setMostrarAlertaExitosa(false);
-            }
+    if (user.password.trim() === "") {
+      setError("Please enter a valid password.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      setError("Invalid email format. Please enter a valid email address.");
+      return;
+    }
+    if (user.password.length < 6) {
+      setError("Password should be at least 6 characters long.");
+      return;
+    }
+    // validacion de Firasebae
 
-        } catch (error) {
-            console.log(error);
-            setMensajeError('Error de conexión');
-        }
+    try {
+      const auth = getAuth();
+      const signInMethods = await fetchSignInMethodsForEmail(auth, user.email);
+      if (signInMethods.length > 0) {
+        setError("This email is already registered. Please try another one.");
+        return;
+      }
 
-    };
+      // Si el correo no está registrado, procedemos con el registro en Firebase
+      await signup(user.email, user.password);
+      setSuccessMessage("Register sucessful");
+      // navigate("/");
+      setError("");
+    } catch (error) {
+      switch (error.code) {
+        case "auth/invalid-email":
+          setError("Invalid email. Please verify your email.");
+          break;
+        case "auth/wrong-password":
+          setError("Incorrect password. Please verify your password.");
 
-    return (
-        <>
-            <Header/>
-            <div class="w-full py-6 mx-auto mt-20 md:w-3/5 lg:w-1/3">
-                <h1 class="mb-1 mt-10 text-xl font-medium text-center text-gray-800 md:text-3xl">Crear Usuario</h1>
-                <form onSubmit={handleFormSubmit} className="mt-12 space-y-4">
-                    <label className="block w-full">
-                        <span className="block mb-1 text-medium font-medium text-gray-700">Nombre de usuario</span>
-                        <input value={nombreUsuario} onChange={handleNombreUsuarioChange} className="form-input w-full rounded" type="text" placeholder="Ingrese el nombre de usuario" required />
-                    </label>
-                    <label className="block">
-                        <span className="block mb-1 text-medium font-medium text-gray-700">Contraseña</span>
-                        <input value={contrasena} onChange={handleContrasenaChange} class="form-input w-full rounded" type="password" placeholder="••••••••" required />
-                    </label>
-                    <button type='submit' class="h-10 w-full text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg hover:bg-indigo-800">Crear</button>
-                </form>
+          break;
+        case "auth/weak-password":
+          setError("Password should be at least 6 characters.");
+          break;
+        default:
+          setError(
+            "There was an error while trying to register. Please try again."
+          );
+          break;
+      }
+    }
+  };
 
-                {mostrarAlertaExitosa && (
-                    <div className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
-                        <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                        <div>
-                            <span className="font-medium">{mensajeExitoso}</span>
-                        </div>
-                    </div>
-                )}
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 h-screen w-full">
+      <div className="hidden sm:block">
+        <img
+          defecto
+          className="w-full h-full object-cover"
+          src={booksLibre}
+          alt="Logo"
+        />
+      </div>
 
-                {mostrarAlertaError && (
+      <div className="bg-custom flex flex-col items-center justify-center">
+        {error && <Alert message={error} />}
+        {successMessage && <Alert type="success" message={successMessage} />}
 
-                    <div className="mt-5 flex bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
-                        <svg className="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                        <div>
-                            <span className="font-medium">{mensajeError}</span>
-                        </div>
-                    </div>
-                )}
-                
-            </div>
-        </>
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-[400px] w-full mx-auto rounded-lg bg-gray-800 p-8 px-8"
+        >
+          <h2 className="text-4xl text-white font-bold text-center">
+            Register
+          </h2>
+          <div className="flex flex-col text-gray-400 py-2">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="rodolfo99@gmail.com"
+              onChange={handleChange}
+              className="p-2 rounded-lg bg-gray-700 mt-2 focus:border-blue-500 focus:bg-gray-800 focus:outline-none"
+            />
+          </div>
 
-    )
+          <div className="flex flex-col text-gray-400 py-2">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              onChange={handleChange}
+              placeholder="******"
+              className="p-2 rounded-lg bg-gray-700 mt-2 focus:border-blue-500 focus:bg-gray-800 focus:outline-none"
+            />
+          </div>
+          <div className="flex justify-between items-center text-gray-400">
+            <button className="w-1/2 my-5 py-2 bg-blue-500 shadow-lg  text-white font-semibold rounded-lg hover:bg-blue-700">
+              Register
+            </button>
+          </div>
+        </form>
+        <p className="max-w-[400px] flex justify-between w-full mx-auto rounded-lg bg-gray-800 p-8 px-8  text-white mt-4 py-4 ">
+          Already an account?
+          <Link to="/Login" className="text-blue-700 hover:text-blue-900">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }

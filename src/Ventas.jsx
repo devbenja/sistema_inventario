@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-import Modal from "react-modal";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { IoMdTrash } from "react-icons/io";
-import { BiEdit } from "react-icons/bi";
+import { FiFile } from "react-icons/fi";
 import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import "./App.css";
 export const Ventas = () => {
+  const MySwal = withReactContent(Swal);
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
@@ -26,6 +27,7 @@ export const Ventas = () => {
   const [mensajeError, setMensajeError] = useState("");
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+  const [ventas, setVentas] = useState([]);
 
   const [precio, setPrecio] = useState("");
 
@@ -37,7 +39,6 @@ export const Ventas = () => {
   };
 
   const handleNombreProductoChange = async (event) => {
-
     const nombreProducto = event.target.value;
 
     setNombreProducto(nombreProducto);
@@ -50,14 +51,11 @@ export const Ventas = () => {
     } catch (error) {
       console.error("Error en la petición:", error);
     }
-
   };
 
   const handleIdCantidadChange = (event) => {
     setCantidad(event.target.value);
   };
-
-
 
   const obtenerClientes = async () => {
     try {
@@ -150,14 +148,26 @@ export const Ventas = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nombreProducto, nombreCliente, cantidad, totalMasIva, subtotal, precio,  iva}),
+        body: JSON.stringify({
+          nombreProducto,
+          nombreCliente,
+          cantidad,
+          totalMasIva,
+          subtotal,
+          precio,
+          iva,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         // Venta exitosa
-        Swal.fire('Realizaciòn de Venta', 'Venta realizada correctamente', 'success')
+        Swal.fire(
+          "Realizaciòn de Venta",
+          "Venta realizada correctamente",
+          "success"
+        );
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
 
@@ -176,7 +186,11 @@ export const Ventas = () => {
 
           // Verificar si el stock es menor o igual a 10
           if (stockActualizado <= 10) {
-            Swal.fire('Informaciòn de Stock', 'Necesitas comprar mas productos', 'warning')
+            Swal.fire(
+              "Información de Stock",
+              "Necesitas comprar mas productos",
+              "warning"
+            );
             setMensajeError("¡Necesitas comprar más productos!");
             setMostrarAlertaError(true);
             setMensajeExitoso("");
@@ -197,6 +211,9 @@ export const Ventas = () => {
         setCantidad("");
         setMensajeError("");
         setMostrarAlertaError(false);
+
+        // Actualizar lista de ventas
+        await actualizarVentas();
       } else {
         // Error al realizar la venta
         setMensajeError(data.mensaje);
@@ -222,22 +239,37 @@ export const Ventas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Asegurar que `fechaFin` sea el inicio del día siguiente al límite final
+    const fechaFinAjustada = new Date(fechaFin);
+    fechaFinAjustada.setDate(fechaFinAjustada.getDate() + 1);
+    fechaFinAjustada.setHours(0, 0, 0, 0);
+
     try {
       const response = await fetch("http://localhost:5000/api/reporte-ventas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ fechaInicio, fechaFin }),
+        body: JSON.stringify({
+          fechaInicio,
+          fechaFin: fechaFinAjustada.toISOString(),
+        }),
       });
       // console.log(response); // Imprime la respuesta completa del servidor en la consola del navegador
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Imprime los datos de la respuesta del servidor en la consola del navegador
+        console.log(data);
         if (data.length === 0) {
-          setModalVisible(true);
+          // Mostrar SweetAlert con el mensaje de advertencia
+          Swal.fire({
+            icon: "warning",
+            title: "No se encontraron registros",
+            // text: "No hay registros para la fecha seleccionada.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "OK",
+          });
         } else {
-          setReporteVentas(data);
+          setVentas(data);
         }
       } else {
         console.error("Error al generar el reporte de ventas");
@@ -252,7 +284,7 @@ export const Ventas = () => {
       const response = await fetch("http://localhost:5000/api/Salidas");
       if (response.ok) {
         const data = await response.json();
-        setReporteVentas(data);
+        setVentas(data);
       } else {
         console.error("Error al obtener las ventas");
       }
@@ -287,9 +319,9 @@ export const Ventas = () => {
 
   const handleDownloadPDF = () => {
     const table = document.querySelector("#table");
-    const columns = Array.from(table.querySelectorAll("th")).map(
-      (headerCell) => headerCell.innerText
-    );
+    const columns = Array.from(
+      table.querySelectorAll("th:not(:last-child)")
+    ).map((headerCell) => headerCell.innerText);
     const data = Array.from(table.querySelectorAll("tr"))
       .slice(1)
       .map((row) =>
@@ -371,6 +403,68 @@ export const Ventas = () => {
   const iva = subtotal * 0.15;
 
   const totalMasIva = subtotal + iva;
+
+  const eliminarVenta = async (idVenta) => {
+    try {
+      const ventaExistente = ventas.find((venta) => venta.IdSalida === idVenta);
+
+      if (!ventaExistente) {
+        throw new Error("No se encontró la venta en la lista de ventas.");
+      }
+
+      const { value } = await MySwal.fire({
+        title: "Confirmar eliminación",
+        text: "¿Estás seguro de que deseas eliminar esta venta?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (value) {
+        const response = await fetch(
+          `http://localhost:5000/api/EliminarSalida/${idVenta}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          const producto = productos.find(
+            (producto) => producto.Nombre === ventaExistente.NombreProducto
+          );
+
+          const cantidadDevuelta = ventaExistente.Cantidad;
+          const nuevoStock = producto.Stock + cantidadDevuelta; // Se regresa la cantidad al stock
+
+          const nuevosProductos = productos.map((p) => {
+            if (p.Nombre === ventaExistente.NombreProducto) {
+              return { ...p, Stock: nuevoStock };
+            }
+            return p;
+          });
+          setProductos(nuevosProductos);
+
+          setVentas(ventas.filter((venta) => venta.IdVenta !== idVenta));
+
+          // Utilizar SweetAlert para mostrar la alerta de éxito al eliminar la venta
+          MySwal.fire("Eliminado", "La venta ha sido eliminada.", "success");
+        } else {
+          const errorMessage = await response.text();
+          throw new Error(errorMessage);
+        }
+      }
+    } catch (error) {
+      console.error("Error al eliminar la venta:", error);
+      MySwal.fire(
+        "Error",
+        "Ocurrió un error al eliminar la venta. Por favor, inténtalo nuevamente.",
+        "error"
+      );
+    }
+  };
 
   return (
     <div>
@@ -541,7 +635,10 @@ export const Ventas = () => {
           <h2 className="font-semibold text-xl">Generar Reporte de Ventas</h2>
           <div className="App-page mt-2">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center">
+              <form
+                onSubmit={handleSubmit}
+                className="p-5 flex items-center justify-center"
+              >
                 <div className="flex flex-wrap items-center justify-center">
                   <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
                     <label
@@ -594,54 +691,79 @@ export const Ventas = () => {
                 </div>
               </form>
               {/* <div style={{ maxHeight: "400px", overflowY: "auto" }}> */}
-              {reporteVentas.length > 0 ? (
+              {ventas.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="App-auto w-full" id="table">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center">
                       <tr>
-                        <th scope="col" className="py-3">#</th>
-                        <th scope="col" className="px-6 py-3">Producto</th>
-                        <th scope="col" className="px-6 py-3">Cliente</th>
-                        <th scope="col" className="py-3">Cantidad</th>
-                        <th scope="col" className="px-6 py-3">Precio Venta</th>
-                        <th scope="col" className="px-6 py-3">Subtotal</th>
-                        <th scope="col" className="px-6 py-3">IVA</th>
-                        <th scope="col" className="px-6 py-3">Total</th>                        
-                        <th scope="col" className="px-6 py-3">Fecha Salida</th>
-                        <th scope="col" className="px-6 py-3">Acciones</th>
+                        <th scope="col" className="py-3">
+                          #
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Producto
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Cliente
+                        </th>
+                        <th scope="col" className="py-3">
+                          Cantidad
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Precio Venta
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Subtotal
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          IVA
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Total
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Fecha Salida
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Acciones
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {reporteVentas.map((venta) => (
-                        <tr key={venta.IdSalida}>
+                      {ventas.map((venta) => (
+                        <tr key={venta.IdSalida} venta={venta}>
                           <td className="border px-4 py-2">{venta.IdSalida}</td>
                           <td className="border px-4 py-2 ">
                             {venta.NombreProducto}
                           </td>
-                          <td className="border px-4 py-2 ">{venta.NombreCliente}</td>
-                          <td className="border px-4 py-2 text-center">{venta.Cantidad}</td>
-                          <td className="border px-4 py-2 text-center">{venta.PrecioVenta} C$</td>
-                          <td className="border px-4 py-2 text-center">{venta.SubtotalVenta} C$</td>
-                          <td className="border px-4 py-2 ">{venta.IVA} C$</td>
-                          <td className="border px-4 py-2 text-center">{venta.TotalDineroIngresado} C$</td>                          
+                          <td className="border px-4 py-2 ">
+                            {venta.NombreCliente}
+                          </td>
                           <td className="border px-4 py-2 text-center">
-                            {new Date (venta.FechaSalida).toLocaleDateString()}
+                            {venta.Cantidad}
+                          </td>
+                          <td className="border px-4 py-2 text-center">
+                            {venta.PrecioVenta} C$
+                          </td>
+                          <td className="border px-4 py-2 text-center">
+                            {venta.SubtotalVenta} C$
+                          </td>
+                          <td className="border px-4 py-2 ">{venta.IVA} C$</td>
+                          <td className="border px-4 py-2 text-center">
+                            {venta.TotalDineroIngresado} C$
+                          </td>
+                          <td className="border px-4 py-2 text-center">
+                            {new Date(venta.FechaSalida).toLocaleDateString()}
                           </td>
                           <td className="border px-4 py-2 flex items-center justify-center">
                             <button
                               className="flex items-center bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            // este funciona
-                            // onClick={() => {
-                            //   setCompraSeleccionada(compra);
-                            //   abrirConfirmModal();
-                            // }}
-
+                              onClick={() => eliminarVenta(venta.IdSalida)}
                             >
                               <IoMdTrash className="w-15" />
                             </button>
 
                             <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <BiEdit className="w-15" />
+                              <FiFile className="w-15" />
                             </button>
                           </td>
                         </tr>
@@ -650,25 +772,6 @@ export const Ventas = () => {
                   </table>
                 </div>
               ) : null}
-              {/* </div> */}
-
-              <Modal
-                isOpen={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-                className="App-modal"
-                overlayClassName="App-modal-overlay"
-              >
-                {/* <h2>No hay registros disponibles</h2> */}
-                <p id="message">
-                  No se encontraron registros para la fecha seleccionada.
-                </p>
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
-                  onClick={() => setModalVisible(false)}
-                >
-                  Cerrar
-                </button>
-              </Modal>
             </div>
           </div>
           <div className="overflow-x-auto mt-8"></div>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-import Modal from "react-modal";
+
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "./App.css";
 import { IoMdTrash } from "react-icons/io";
-import { BiEdit } from "react-icons/bi";
-
+import { FiFile } from "react-icons/fi";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
@@ -70,7 +69,6 @@ export const Compras = () => {
     } catch (error) {
       console.error("Error en la petición:", error);
     }
-
   };
 
   const handleIdCantidadChange = (event) => {
@@ -158,13 +156,25 @@ export const Compras = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nombreProducto, nombreProveedor, cantidad, precio , subtotal, total, iva }),
+        body: JSON.stringify({
+          nombreProducto,
+          nombreProveedor,
+          cantidad,
+          precio,
+          subtotal,
+          total,
+          iva,
+        }),
       });
 
       var data = await response.json();
 
       if (response.ok) {
-        Swal.fire('Realizaciòn de compra', 'Compra realizada correctamente', 'success')
+        Swal.fire(
+          "Realizaciòn de compra",
+          "Compra realizada correctamente",
+          "success"
+        );
         setMensajeExitoso(data.mensaje);
         setMostrarAlertaExitosa(true);
         // Limpiar los campos de entrada después de crear el usuario
@@ -211,6 +221,10 @@ export const Compras = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const fechaFinAjustada = new Date(fechaFin);
+    fechaFinAjustada.setDate(fechaFinAjustada.getDate() + 1);
+    fechaFinAjustada.setHours(0, 0, 0, 0);
+
     try {
       const response = await fetch(
         "http://localhost:5000/api/reporte-compras",
@@ -219,20 +233,30 @@ export const Compras = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ fechaInicio, fechaFin }),
+          body: JSON.stringify({
+            fechaInicio,
+            fechaFin: fechaFinAjustada.toISOString(),
+          }),
         }
       );
       console.log(response); // Imprime la respuesta completa del servidor en la consola del navegador
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Imprime los datos de la respuesta del servidor en la consola del navegador
+        console.log(data);
         if (data.length === 0) {
-          setModalVisible2(true);
+          // Mostrar SweetAlert con el mensaje de advertencia
+          Swal.fire({
+            icon: "warning",
+            title: "No se encontraron registros",
+            // text: "No hay registros para la fecha seleccionada.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "OK",
+          });
         } else {
-          setReporteCompras(data);
+          setCompras(data);
         }
       } else {
-        console.error("Error al generar el reporte de ventas");
+        console.error("Error al generar el reporte de compras");
       }
     } catch (error) {
       console.error(error);
@@ -590,10 +614,15 @@ export const Compras = () => {
           </form>
         </div>
         <div className="md:col-span-3 bg-white p-5 rounded-lg shadow-lg overflow-y-auto">
-          <h2 className="font-semibold text-xl mb-6">Generar Reporte de Compras</h2>
+          <h2 className="font-semibold text-xl mb-6">
+            Generar Reporte de Compras
+          </h2>
           <div className="App-page mt-4">
             <div className="App-container">
-              <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center">
+              <form
+                onSubmit={handleSubmit}
+                className="p-5 flex items-center justify-center"
+              >
                 <div className="flex flex-wrap items-center justify-center">
                   <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
                     <label
@@ -688,7 +717,7 @@ export const Compras = () => {
                         <tr
                           key={compra.IdEntrada}
                           compra={compra}
-                        // eliminarCompra={eliminarCompra}
+                          // eliminarCompra={eliminarCompra}
                         >
                           <td className="border px-4 py-2 text-center">
                             {compra.IdEntrada}
@@ -703,13 +732,13 @@ export const Compras = () => {
                             {compra.Cantidad}
                           </td>
                           <td className="border px-4 py-2 text-center">
-                            {compra.PrecioCompra}
+                            {compra.PrecioCompra} C$
                           </td>
                           <td className="border px-4 py-2 text-center">
                             {compra.SubtotalCompra} C$
                           </td>
-                          
-                          <td className="border px-2 py-2 text-center">
+
+                          <td className="border px-4 py-2 text-center">
                             {compra.TotalDineroGastado} C$
                           </td>
 
@@ -717,23 +746,18 @@ export const Compras = () => {
                             {compra.IVA} C$
                           </td>
                           <td className="border px-4 py-2 text-center">
-                            {new Date (compra.FechaEntrada).toLocaleDateString()}
+                            {new Date(compra.FechaEntrada).toLocaleDateString()}
                           </td>
                           <td className="border px-5 py-4 flex items-center justify-center">
                             <button
                               className="flex items-center bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              // este funciona
-                              // onClick={() => {
-                              //   setCompraSeleccionada(compra);
-                              //   abrirConfirmModal();
-                              // }}
                               onClick={() => eliminarCompra(compra.IdEntrada)}
                             >
                               <IoMdTrash className="w-15" />
                             </button>
 
                             <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <BiEdit className="w-15" />
+                              <FiFile className="w-15" />
                             </button>
                           </td>
                         </tr>
@@ -742,27 +766,10 @@ export const Compras = () => {
                   </table>
                 </div>
               ) : null}
-
-              <Modal
-                isOpen={modalVisible2}
-                onRequestClose={() => setModalVisible2(false)}
-                className="App-modal"
-                overlayClassName="App-modal-overlay"
-              >
-                <p id="message">
-                  No se encontraron registros para la fecha seleccionada.
-                </p>
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
-                  onClick={() => setModalVisible2(false)}
-                >
-                  Cerrar
-                </button>
-              </Modal>
             </div>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
