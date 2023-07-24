@@ -33,7 +33,7 @@ export const Login = () => {
             });
 
             const data = await response.json();
-            const usuario = {nombreUsuario, contrasena}
+            const usuario = { nombreUsuario, contrasena }
 
             if (response.ok) {
                 console.log(usuario);
