@@ -10,6 +10,7 @@ import { Route, Routes } from "react-router-dom";
 import { Login } from "./Login";
 import { AuthProvider } from "./context/authContext";
 import { ProtecteRoute } from "./components/ProtectedRoute";
+import VentasRealizadas from "./VentasRealizadas";
 
 function App() {
   return (
@@ -75,6 +76,15 @@ function App() {
             element={
               <ProtecteRoute>
                 <Ventas />
+              </ProtecteRoute>
+            }
+          />
+
+          <Route
+            path="/VentasRealizadas"
+            element={
+              <ProtecteRoute>
+                <VentasRealizadas />
               </ProtecteRoute>
             }
           />
