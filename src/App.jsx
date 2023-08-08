@@ -11,6 +11,7 @@ import { Login } from "./Login";
 import { AuthProvider } from "./context/authContext";
 import { ProtecteRoute } from "./components/ProtectedRoute";
 import VentasRealizadas from "./VentasRealizadas";
+import ComprasRealizadas from "./ComprasRealizadas";
 
 function App() {
   return (
@@ -85,6 +86,14 @@ function App() {
             element={
               <ProtecteRoute>
                 <VentasRealizadas />
+              </ProtecteRoute>
+            }
+          />
+          <Route
+            path="/ComprasRealizadas"
+            element={
+              <ProtecteRoute>
+                <ComprasRealizadas />
               </ProtecteRoute>
             }
           />

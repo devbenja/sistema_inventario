@@ -1,56 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import "./App.css";
 import { IoMdTrash } from "react-icons/io";
-import { FiFile } from "react-icons/fi";
+import { Link } from "react-router-dom";
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
+import "./App.css";
 export const Compras = () => {
   const MySwal = withReactContent(Swal);
 
-  const [fechaSeleccionada, setFechaSeleccionada] = useState("");
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [reporteCompras, setReporteCompras] = useState([]);
-  const [modalVisible2, setModalVisible2] = useState(false);
-
-  // const [modalVisible2, setModalVisible2] = useState(false);
-  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
-  const [compraSeleccionada, setCompraSeleccionada] = useState(null);
-
-  const [entradas, setEntradas] = useState([]);
+  const [ventaHabilitada, setVentaHabilitada] = useState(false);
+  const [totalPagado, setTotalPagado] = useState(0);
+  const [vuelto, setVuelto] = useState(0);
+  const [descuento, setDescuento] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [productosEnTabla, setProductosEnTabla] = useState([]);
   const [proveedores, setProveedores] = useState([]);
   const [productos, setProductos] = useState([]);
-
   const [nombreProducto, setNombreProducto] = useState("");
   const [nombreProveedor, setNombreProveedor] = useState("");
   const [cantidad, setCantidad] = useState("");
-
   const [mensajeExitoso, setMensajeExitoso] = useState("");
   const [mensajeError, setMensajeError] = useState("");
   const [mostrarAlertaExitosa, setMostrarAlertaExitosa] = useState(false);
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
 
   const [precio, setPrecio] = useState("");
-  const [compras, setCompras] = useState([]);
-
-  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-
-  const abrirConfirmModal = () => {
-    setConfirmModalVisible(true);
-  };
-
-  const cerrarConfirmModal = () => {
-    setConfirmModalVisible(false);
-  };
-
-  const handleFechaSeleccionada = (fecha) => {
-    setFechaSeleccionada(fecha);
-  };
+  useEffect(() => {
+    console.log("Productos en tabla actualizados:", productosEnTabla);
+  }, [productosEnTabla]);
 
   const handleNombreProveedorChange = (event) => {
     setNombreProveedor(event.target.value);
@@ -74,6 +53,9 @@ export const Compras = () => {
   const handleIdCantidadChange = (event) => {
     setCantidad(event.target.value);
   };
+  const handleTotalChange = (event) => {
+    setTotal(event.target.value);
+  };
 
   const obtenerProveedores = async () => {
     try {
@@ -85,10 +67,6 @@ export const Compras = () => {
     }
   };
 
-  useEffect(() => {
-    obtenerProveedores();
-  }, []);
-
   const obtenerProductos = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/Productos");
@@ -99,13 +77,115 @@ export const Compras = () => {
     }
   };
 
+  //! ...
+  const handleRealizarCompra = async () => {
+    try {
+      const totalVenta = productosEnTabla.reduce(
+        (total, producto) => total + parseFloat(producto.total),
+        0
+      );
+
+      // console.log("Datos a enviar al backend:", {
+      //   nombreProveedor,
+      //   total: totalVenta,
+      //   productosEnVenta: productosEnTabla,
+      //   totalPagado: totalPagado,
+      //   vuelto: vuelto,
+      // });
+
+      if (totalPagado < totalVenta) {
+        MySwal.fire("Pago insuficiente", "", "error");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/api/GenerarEntrada", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombreProveedor,
+          totalVenta: totalVenta,
+          productosEnVenta: productosEnTabla,
+          totalPagado: totalPagado,
+          vuelto: vuelto,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        MySwal.fire(
+          "Realización de Compra",
+          "Compra realizada correctamente",
+          "success"
+        );
+        setMensajeExitoso(data.mensaje);
+        setMostrarAlertaExitosa(true);
+
+        setTimeout(() => {
+          setMostrarAlertaExitosa(false);
+        }, 3000);
+
+        // Limpiar los campos de entrada después de crear la venta
+        setNombreProveedor("");
+        setProductosEnTabla([]);
+        setTotalPagado("");
+        setVuelto("");
+      } else {
+        // Error al realizar la venta
+        setMensajeError(data.mensaje);
+        setMostrarAlertaError(true);
+        setMensajeExitoso("");
+        setMostrarAlertaExitosa(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setMensajeError("Error de conexión");
+    }
+  };
+
   useEffect(() => {
+    obtenerProveedores();
     obtenerProductos();
   }, []);
 
-  const handleFormSubmit = async (event) => {
-    event.preventDefault();
+  useEffect(() => {
+    const cantidadValue = parseFloat(cantidad);
+    const precioValue = parseFloat(precio);
+    const descuentoValue = parseFloat(descuento);
 
+    const subtotalValue = cantidadValue * precioValue;
+
+    // Calcular el IVA
+    const ivaValue = subtotalValue * 0.15;
+
+    // Calcular el subtotal incluyendo el IVA
+    const subtotalMasIvaValue = subtotalValue + ivaValue;
+
+    // Calcular el total con el descuento aplicado
+    const totalDescuentoValue =
+      subtotalMasIvaValue * (1 - descuentoValue / 100);
+
+    setSubtotal(subtotalValue);
+    setIva(ivaValue);
+    setTotal(totalDescuentoValue);
+    setTotalMasIva(subtotalMasIvaValue);
+
+    // Calcular el vuelto
+    const totalVenta = totalDescuentoValue;
+  }, [cantidad, precio, totalPagado, descuento]);
+
+  const [subtotal, setSubtotal] = useState(0);
+  const [iva, setIva] = useState(0);
+  const [totalMasIva, setTotalMasIva] = useState(0);
+
+  const handleTotalPagadoChange = (event) => {
+    const totalPagadoValue = parseFloat(event.target.value);
+    setTotalPagado(totalPagadoValue);
+  };
+
+  const handleAgregarProducto = async () => {
     try {
       const proveedorSeleccionado = proveedores.find(
         (proveedor) => proveedor.NombreProveedor === nombreProveedor
@@ -117,18 +197,14 @@ export const Compras = () => {
         setMensajeExitoso("");
         setMostrarAlertaExitosa(false);
 
-        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
         setTimeout(() => {
           setMensajeError("");
-          setNombreProveedor("");
-          setNombreProducto("");
-          setCantidad("");
+
           setMostrarAlertaError(false);
         }, 3000);
         return;
       }
 
-      // Obtener el stock del producto seleccionado
       const productoSeleccionado = productos.find(
         (producto) => producto.Nombre === nombreProducto
       );
@@ -140,320 +216,145 @@ export const Compras = () => {
         setMensajeExitoso("");
         setMostrarAlertaExitosa(false);
 
-        // Eliminar el mensaje de error y limpiar el formulario después de 3 segundos
         setTimeout(() => {
           setMensajeError("");
-          setNombreProducto("");
-          setNombreProveedor("");
-          setCantidad("");
           setMostrarAlertaError(false);
         }, 3000);
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/GenerarEntrada", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombreProducto,
-          nombreProveedor,
-          cantidad,
-          precio,
-          subtotal,
-          total,
-          iva,
-        }),
-      });
-
-      var data = await response.json();
-
-      if (response.ok) {
-        Swal.fire(
-          "Realizaciòn de compra",
-          "Compra realizada correctamente",
-          "success"
-        );
-        setMensajeExitoso(data.mensaje);
-        setMostrarAlertaExitosa(true);
-        // Limpiar los campos de entrada después de crear el usuario
-        setNombreProducto("");
-        setNombreProveedor("");
-        setCantidad("");
-        setMensajeError("");
-        setMostrarAlertaError(false);
-
-        // Ocultara la alerta luego de 3 seg
-
-        setTimeout(() => {
-          setMostrarAlertaExitosa(false);
-        }, 3000);
-        // Actualizar la lista de compras desde el backend
-        await actualizarCompras();
-      } else {
-        setMensajeError(data.mensaje);
-        setMostrarAlertaError(true);
-        setMensajeExitoso("");
-        setMostrarAlertaExitosa(false);
-      }
-    } catch (error) {
-      console.log(error);
-      setMensajeError("Error de conexión");
-    }
-
-    // console.log(nombreProducto);
-  };
-
-  const obtenerEntradas = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/Entradas");
-      const data = await response.json();
-      setEntradas(data);
-    } catch (error) {
-      console.error("Error al obtener Entradas", error);
-    }
-  };
-
-  useEffect(() => {
-    obtenerEntradas();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const fechaFinAjustada = new Date(fechaFin);
-    fechaFinAjustada.setDate(fechaFinAjustada.getDate() + 1);
-    fechaFinAjustada.setHours(0, 0, 0, 0);
-
-    try {
+      // Realizar la solicitud para obtener el stock del producto
       const response = await fetch(
-        "http://localhost:5000/api/reporte-compras",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fechaInicio,
-            fechaFin: fechaFinAjustada.toISOString(),
-          }),
-        }
+        `http://localhost:5000/api/VerificarStock/${nombreProducto}`
       );
-      console.log(response); // Imprime la respuesta completa del servidor en la consola del navegador
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        if (data.length === 0) {
-          // Mostrar SweetAlert con el mensaje de advertencia
-          Swal.fire({
-            icon: "warning",
-            title: "No se encontraron registros",
-            // text: "No hay registros para la fecha seleccionada.",
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: "OK",
-          });
-        } else {
-          setCompras(data);
-        }
-      } else {
-        console.error("Error al generar el reporte de compras");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  const actualizarCompras = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/Entradas");
-      if (response.ok) {
-        const data = await response.json();
-        // setReporteCompras(data);/*esto es para los reportes */
-        setCompras(data);
+      // Verificar si la respuesta es exitosa (código 200)
+      if (!response.ok) {
+        throw new Error("Error al obtener el stock del producto");
+      }
+
+      const data = await response.json();
+
+      const stock = data.stock;
+
+      if (stock >= parseInt(cantidad)) {
+        const subtotal = cantidad * precio;
+
+        // Si el stock es suficiente, agregar o actualizar el producto en la tabla
+        const productoExistente = productosEnTabla.find(
+          (producto) => producto.nombre === nombreProducto
+        );
+
+        if (productoExistente) {
+          // Si el producto ya existe en la tabla, actualizamos los datos
+          const nuevaCantidad =
+            parseInt(productoExistente.cantidad) + parseInt(cantidad);
+
+          const nuevoSubtotal = nuevaCantidad * precio;
+          const nuevoTotal =
+            nuevoSubtotal * (1 + iva / 100) * (1 - descuento / 100);
+
+          const productoActualizado = {
+            ...productoExistente,
+            cantidad: nuevaCantidad,
+            subtotal: nuevoSubtotal,
+            total: nuevoTotal,
+            nombreProveedor: nombreProveedor,
+            // totalPagado: totalPagado,
+            // vuelto: vuelto,
+          };
+
+          // Actualizar el producto existente en la lista
+          setProductosEnTabla((prevProductos) =>
+            prevProductos.map((producto) =>
+              producto.nombre === nombreProducto
+                ? productoActualizado
+                : producto
+            )
+          );
+        } else {
+          // Si el producto no existe en la tabla, lo agregamos
+          const nuevoProducto = {
+            idProducto: productos.find(
+              (producto) => producto.Nombre === nombreProducto
+            ).IdProducto,
+            nombre: nombreProducto,
+            cantidad: cantidad,
+            precio: precio,
+            descuento: descuento,
+            iva: iva,
+            subtotal: subtotal,
+            total: total,
+            nombreProveedor: nombreProveedor,
+            // totalPagado: totalPagado,
+            // vuelto: vuelto,
+          };
+          setProductosEnTabla((prevProductos) => [
+            ...prevProductos,
+            nuevoProducto,
+          ]);
+        }
+
+        setNombreProducto("");
+        setCantidad("");
+        setPrecio("");
+        setDescuento(0);
+
+        // console.log("Productos en tabla actualizados:", productosEnTabla);
       } else {
-        console.error("Error al obtener las ventas");
+        MySwal.fire(
+          "Error",
+          "No hay suficientes productos en el stock",
+          "error"
+        );
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error al obtener el stock del producto:", error);
     }
   };
 
   useEffect(() => {
-    actualizarCompras();
-  }, []);
-  const mostrarModalSinRegistros = () => {
-    setModalVisible2(true);
-  };
+    // Calcular el total de la venta actual en la tabla
+    const totalVenta = productosEnTabla.reduce((total, producto) => {
+      return total + parseFloat(producto.total);
+    }, 0);
 
-  function drawFooter(doc, pageNumber) {
-    const footerText = `Página ${pageNumber}`;
-    const x = doc.internal.pageSize.getWidth() / 2;
-    const y = doc.internal.pageSize.getHeight() - 10;
+    // Calcular el vuelto restando el totalPagado del total de la venta
+    const vueltoValue = totalPagado - totalVenta;
+    setVuelto(vueltoValue);
+  }, [productosEnTabla, totalPagado]);
 
-    // Ajustar el tamaño de fuente y el estilo
-    doc.setFontSize(8);
-    doc.setFont("normal");
+  useEffect(() => {
+    setVentaHabilitada(productosEnTabla.length > 0);
+  }, [productosEnTabla]);
 
-    doc.text(footerText, x, y, { align: "center" });
-  }
-
-  const handleDownloadPDF = () => {
-    const table = document.querySelector("#table");
-    const columns = Array.from(
-      table.querySelectorAll("th:not(:last-child)")
-    ).map((headerCell) => headerCell.innerText);
-    const data = Array.from(table.querySelectorAll("tr"))
-      .slice(1)
-      .map((row) =>
-        Array.from(row.querySelectorAll("td")).map((cell) => cell.innerText)
-      );
-
-    const doc = new jsPDF();
-
-    // Agregar imagen de encabezado
-    const headerImagePath = "./logo11.jpg"; // Reemplaza "ruta-de-la-imagen" con la ruta real de la imagen
-    const imgWidth = doc.internal.pageSize.getWidth(); // Ancho de la imagen igual al ancho de la página
-    const imgHeight = 50; // Altura de la imagen (puedes ajustarla según tus necesidades)
-    const x = 0; // Posición horizontal de la imagen (comienza desde el borde izquierdo)
-    const y = 10; // Posición vertical de la imagen
-    doc.addImage(headerImagePath, "JPEG", x, y, imgWidth, imgHeight); // Agregar imagen al PDF
-
-    // Fecha
-    const currentDate = new Date().toLocaleDateString();
-    doc.setFontSize(10); // Ajustar el tamaño de fuente
-    doc.setFont("helvetica", "bold"); // Establecer el estilo de fuente en negrita
-
-    const fechaText = "Fecha:";
-    const fechaX = 10; // Posición horizontal del texto "Fecha:"
-    const fechaTextWidth =
-      (doc.getStringUnitWidth(fechaText) * doc.internal.getFontSize()) /
-      doc.internal.scaleFactor;
-    const fechaActualX = fechaX + fechaTextWidth + 2; // Ajustar el espacio entre el texto y la fecha actual
-    doc.text(fechaText, fechaX, imgHeight + 18); // Colocar el texto "Fecha:"
-    doc.text(currentDate, fechaActualX, imgHeight + 18); // Colocar la fecha actual
-
-    doc.setFont("helvetica", "normal"); // Restaurar el estilo de fuente normal
-
-    // Texto centrado en la parte superior de la tabla
-    const textoSuperior = "Reporte de compras";
-    const textoSuperiorX = doc.internal.pageSize.getWidth() / 2;
-    const textoSuperiorY = imgHeight + 25; // Ajustar la posición vertical del texto superior
-    doc.setFontSize(12); // Ajustar el tamaño de fuente para el texto superior
-    doc.text(textoSuperior, textoSuperiorX, textoSuperiorY, {
-      align: "center",
+  const calcularTotalVenta = () => {
+    let totalVenta = 0;
+    productosEnTabla.forEach((producto) => {
+      totalVenta += parseFloat(producto.total);
     });
-
-    doc.autoTable({
-      head: [columns],
-      body: data,
-      startY: imgHeight + 30, // Ajustar la posición vertical de los datos
-      didDrawCell: function (data) {
-        // Dibujar bordes de las celdas
-        const { table, row, column } = data;
-        if (row === 0) {
-          // Bordes de la fila de encabezado
-          doc.setFillColor(230, 230, 230); // Color de fondo para el encabezado
-          doc.rect(
-            data.cell.x,
-            data.cell.y,
-            data.cell.width,
-            data.cell.height,
-            "S"
-          );
-        }
-        // Bordes de las celdas
-        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height);
-      },
-    });
-
-    // Pie de página
-    const totalPages = doc.internal.getNumberOfPages();
-
-    // Iterar sobre cada página y agregar el pie de página
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i); // Establecer la página actual
-      drawFooter(doc, i); // Agregar el pie de página
-    }
-
-    doc.save("compras.pdf");
+    return totalVenta;
   };
 
-  const subtotal = cantidad * precio;
+  const mensajeNoProductos = (
+    <div className="mt-4 text-center text-gray-600">
+      No hay productos agregados.
+    </div>
+  );
 
-  const iva = subtotal * 0.15;
-
-  const total = subtotal + iva;
-
-  const eliminarCompra = async (idCompra) => {
-    try {
-      const compraExistente = compras.find(
-        (compra) => compra.IdEntrada === idCompra
-      );
-
-      if (!compraExistente) {
-        throw new Error("No se encontró la compra en la lista de compras.");
-      }
-
-      const { value } = await MySwal.fire({
-        title: "Confirmar eliminación",
-        text: "¿Estás seguro de que deseas eliminar esta compra?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Eliminar",
-        cancelButtonText: "Cancelar",
-      });
-
-      if (value) {
-        const response = await fetch(
-          `http://localhost:5000/api/EliminarEntrada/${idCompra}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (response.ok) {
-          const producto = productos.find(
-            (producto) => producto.Nombre === compraExistente.NombreProducto
-          );
-
-          const cantidadEliminada = compraExistente.Cantidad;
-          const nuevoStock = producto.Stock - cantidadEliminada;
-
-          const nuevosProductos = productos.map((p) => {
-            if (p.Nombre === compraExistente.NombreProducto) {
-              return { ...p, Stock: nuevoStock };
-            }
-            return p;
-          });
-          setProductos(nuevosProductos);
-
-          setCompras(compras.filter((compra) => compra.IdEntrada !== idCompra));
-
-          // Utilizar SweetAlert para mostrar la alerta de éxito al eliminar la compra
-          MySwal.fire("Eliminado", "La compra ha sido eliminada.", "success");
-        } else {
-          const errorMessage = await response.text();
-          throw new Error(errorMessage);
-        }
-      }
-    } catch (error) {
-      console.error("Error al eliminar la compra:", error);
-      MySwal.fire(
-        "Error",
-        "Ocurrió un error al eliminar la compra. Por favor, inténtalo nuevamente.",
-        "error"
-      );
-    }
+  const eliminarProducto = (indice) => {
+    setProductosEnTabla((prevProductos) =>
+      prevProductos.filter((_, index) => index !== indice)
+    );
   };
-
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-4 bg-gray-200 gap-1 p-5">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 bg-gray-200 gap-1 p-5">
         <div className="md:col-span-1 col-span-1 bg-white p-5 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold mb-6">Generar compra</h2>
+          <h2 className="font-semibold text-xl mb-6">Generar Compra</h2>
+
           {mostrarAlertaExitosa && (
             <div
               className="mt-5 flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700"
@@ -499,69 +400,55 @@ export const Compras = () => {
               </div>
             </div>
           )}
-
-          <form onSubmit={handleFormSubmit}>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 font-semibold mb-2"
-                htmlFor="country"
-              >
-                Proveedor
-              </label>
-              <select
-                id="country"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                value={nombreProveedor}
-                onChange={handleNombreProveedorChange}
-              >
-                <option>-- Seleccionar --</option>
-                {proveedores.map((proveedor) => (
-                  <option
-                    value={proveedor.NombreProveedor}
-                    key={proveedor.IdProveedor}
-                  >
-                    {proveedor.NombreProveedor}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 font-semibold mb-2"
-                htmlFor="city"
-              >
-                Producto
-              </label>
-              <select
-                id="city"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                value={nombreProducto}
-                onChange={handleNombreProductoChange}
-              >
-                <option>-- Seleccionar --</option>
-                {productos.map((producto) => (
-                  <option value={producto.Nombre} key={producto.IdProducto}>
-                    {producto.Nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 font-semibold mb-2"
-                htmlFor="name"
-              >
-                Cantidad
-              </label>
-              <input
-                required
-                value={cantidad}
-                onChange={handleIdCantidadChange}
-                type="text"
-                id="name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
+          <form>
+            <div className="flex gap-2">
+              <div className="mb-4 w-1/2">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="country"
+                >
+                  Proveedor
+                </label>
+                <select
+                  required
+                  id="country"
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  value={nombreProveedor}
+                  onChange={handleNombreProveedorChange}
+                >
+                  <option>-- Seleccionar --</option>
+                  {proveedores.map((proveedor) => (
+                    <option
+                      value={proveedor.NombreProveedor}
+                      key={proveedor.IdProveedor}
+                    >
+                      {proveedor.NombreProveedor}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4 w-1/2">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="city"
+                >
+                  Producto
+                </label>
+                <select
+                  id="city"
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  value={nombreProducto}
+                  onChange={handleNombreProductoChange}
+                  required
+                >
+                  <option>-- Seleccionar --</option>
+                  {productos.map((producto) => (
+                    <option value={producto.Nombre} key={producto.IdProducto}>
+                      {producto.Nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="mb-4">
@@ -574,11 +461,61 @@ export const Compras = () => {
               <input
                 type="number"
                 value={precio}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                className="w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
+
+            <div className="flex gap-2">
+              <div className="mb-4">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="name"
+                >
+                  Cantidad
+                </label>
+                <input
+                  required
+                  value={cantidad}
+                  onChange={handleIdCantidadChange}
+                  type="text"
+                  id="name"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="descuento"
+                >
+                  Descuento (%)
+                </label>
+                <input
+                  value={descuento}
+                  onChange={(e) => setDescuento(parseFloat(e.target.value))}
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <div className="mb-8">
+                <label
+                  className="block text-gray-700 font-semibold mb-2"
+                  htmlFor="iva"
+                >
+                  IVA
+                </label>
+                <input
+                  value={iva}
+                  readOnly
+                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="">
                 <label
                   className="block text-gray-700 font-semibold mb-2"
                   htmlFor="name"
@@ -587,187 +524,177 @@ export const Compras = () => {
                 </label>
                 <input
                   value={subtotal}
-                  type="number"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div className="mb-8">
-                <label
-                  className="block text-gray-700 font-semibold mb-2"
-                  htmlFor="name"
-                >
-                  Total
-                </label>
-                <input
-                  value={total}
+                  readOnly
                   type="number"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full"
-            >
-              Realizar compra
-            </button>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 font-semibold mb-2"
+                htmlFor="total"
+              >
+                Total
+              </label>
+              <input
+                value={total}
+                onChange={handleTotalChange}
+                readOnly
+                type="number"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleAgregarProducto}
+                className="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
+              >
+                Agregar producto
+              </button>
+
+              <button
+                type="button"
+                disabled={!ventaHabilitada} // Deshabilita el botón cuando ventaHabilitada es false
+                onClick={handleRealizarCompra}
+                className={`${
+                  ventaHabilitada
+                    ? "bg-green-500 hover:bg-blue-700"
+                    : "bg-gray-400 pointer-events-none"
+                } text-white font-semibold py-2 px-4 rounded w-full`}
+              >
+                Realizar Compra
+              </button>
+            </div>
           </form>
         </div>
-        <div className="md:col-span-3 bg-white p-5 rounded-lg shadow-lg overflow-y-auto">
-          <h2 className="font-semibold text-xl mb-6">
-            Generar Reporte de Compras
-          </h2>
-          <div className="App-page mt-4">
-            <div className="App-container">
-              <form
-                onSubmit={handleSubmit}
-                className="p-5 flex items-center justify-center"
+
+        <div className="md:col-span-2 col-span-2 bg-white p-5 rounded-lg shadow-lg ">
+          {/* Agregar la lista y enlaces aquí */}
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Compras Realizadas</h2>
+              <Link
+                to="/ComprasRealizadas"
+                className="text-blue-500 hover:underline"
               >
-                <div className="flex flex-wrap items-center justify-center">
-                  <div className="w-full lg:w-1/4 mb-2 sm:mr-2">
-                    <label
-                      className="text-gray-700 font-semibold mb-2"
-                      htmlFor="startDate"
-                    >
-                      Fecha de inicio
-                      <input
-                        type="date"
-                        value={fechaInicio}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                        className="w-full px-4 uppercase py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                        required
-                      />
-                    </label>
-                  </div>
-                  <div className="w-full lg:w-1/4 mb-2 sm:mr-4">
-                    <label
-                      className="text-gray-700 font-semibold mb-2"
-                      htmlFor="endDate"
-                    >
-                      Fecha de fin
-                      <input
-                        type="date"
-                        value={fechaFin}
-                        onChange={(e) => setFechaFin(e.target.value)}
-                        className="w-full uppercase px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 "
-                        required
-                      />
-                    </label>
-                  </div>
-                  <div className="flex mt-4 items-center justify-center gap-2">
-                    <button
-                      type="submit"
-                      className="block bg-blue-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded"
-                    >
-                      Generar reporte
-                    </button>
-                    <button
-                      onClick={handleDownloadPDF}
-                      id="btnPdf"
-                      type="button"
-                      download="ventas.pdf"
-                      className="bg-blue-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded ms-5"
-                    >
-                      Generar PDF
-                    </button>
-                  </div>
-                </div>
-              </form>
-              {/* se esta modificando para que contenga las compras asi estaba: reporteCompras */}
-              {compras.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="App-auto w-full" id="table">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center border">
-                      <tr>
-                        <th scope="col" className="py-3 border">
-                          #
-                        </th>
-                        <th scope="col" className="px-5 py-3 border">
-                          Producto
-                        </th>
-                        <th scope="col" className="px-7 py-3 border">
-                          Proveedor
-                        </th>
-                        <th scope="col" className="px-2 py-2 border">
-                          Cantidad
-                        </th>
-                        <th scope="col" className="px-2 py-2 border">
-                          Precio
-                        </th>
-                        <th scope="col" className="py-2 px-3 border">
-                          Subtotal
-                        </th>
-                        <th scope="col" className="py-2 px-4 border">
-                          IVA
-                        </th>
-                        <th scope="col" className="px-6 py-3 border">
-                          Total
-                        </th>
-                        <th scope="col" className="px-6 py-3 border">
-                          Fecha Compra
-                        </th>
-                        <th scope="col" className="px-6 py-3 border">
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* igual aca para rellenar seran con compra antes estaba: reporte.Compras */}
-                      {compras.map((compra) => (
-                        <tr
-                          key={compra.IdEntrada}
-                          compra={compra}
-                          // eliminarCompra={eliminarCompra}
-                        >
-                          <td className="border px-4 py-2 text-center">
-                            {compra.IdEntrada}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {compra.NombreProducto}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {compra.NombreProveedor}
-                          </td>
-                          <td className="border px-4 py-2 text-center">
-                            {compra.Cantidad}
-                          </td>
-                          <td className="border px-4 py-2 text-center">
-                            {compra.PrecioCompra} C$
-                          </td>
-                          <td className="border px-4 py-2 text-center">
-                            {compra.SubtotalCompra} C$
-                          </td>
-
-                          <td className="border px-4 py-2 text-center">
-                            {compra.TotalDineroGastado} C$
-                          </td>
-
-                          <td className="border px-2 py-2 text-center">
-                            {compra.IVA} C$
-                          </td>
-                          <td className="border px-4 py-2 text-center">
-                            {new Date(compra.FechaEntrada).toLocaleDateString()}
-                          </td>
-                          <td className="border px-5 py-4 flex items-center justify-center">
-                            <button
-                              className="flex items-center bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              onClick={() => eliminarCompra(compra.IdEntrada)}
-                            >
-                              <IoMdTrash className="w-15" />
-                            </button>
-
-                            <button className="flex items-center ml-5 bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <FiFile className="w-15" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : null}
+                Ver todas las Compras realizadas
+              </Link>
             </div>
           </div>
+          {/* Fin de la lista y enlaces */}
+          <table className="App-auto w-full" id="table">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 text-center border">
+              <tr>
+                <th scope="col" className="py-3 border">
+                  Codigo
+                </th>
+                <th scope="col" className="py-3 border">
+                  Nombre Producto
+                </th>
+
+                <th scope="col" className="py-3 border">
+                  Cantidad
+                </th>
+                <th scope="col" className="py-3 border">
+                  Precio
+                </th>
+                <th scope="col" className="py-3 border">
+                  Subtotal
+                </th>
+                <th scope="col" className="py-3 border">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-y-4">
+              {productosEnTabla.map((producto, index) => (
+                <tr key={index}>
+                  <td className="border px-4 py-2 text-center">
+                    {producto.idProducto}
+                  </td>
+
+                  <td className="border px-4 py-2 text-center">
+                    {producto.nombre}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {producto.cantidad}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {producto.precio}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {producto.subtotal}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    <button
+                      className=" h-full bg-red-500 hover:bg-blue-600 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={() => eliminarProducto(index)}
+                      title="Eliminar Producto"
+                    >
+                      <IoMdTrash className="w-15" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Mensaje cuando no hay productos */}
+          <div className="mb-2 font-bold">
+            {productosEnTabla.length === 0 && mensajeNoProductos}
+          </div>
+          {/* Total de venta */}
+          {productosEnTabla.length > 0 && (
+            <div className="mt-4 flex justify-center items-center">
+              <div className="inline-block">
+                <label className="block text-gray-700 font-bold mb-2">
+                  Total de Compra:
+                </label>
+              </div>
+              <p className="text-lg font-semibold inline-block mb-2 ms-2">
+                {calcularTotalVenta()} C$
+              </p>
+            </div>
+          )}
+          <hr />
+          {/* Campo de entrada para el Total Pagado */}
+          {productosEnTabla.length > 0 && (
+            <div className="flex gap-2">
+              <div className="mt-4 flex justify-center items-center">
+                <div className="inline-block">
+                  <label className="block text-gray-700 font-semibold mb-2">
+                    Total Pagado por el Cliente:
+                  </label>
+                  <input
+                    type="number"
+                    value={totalPagado}
+                    onChange={handleTotalPagadoChange}
+                    required
+                    className="w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Vuelto */}
+              <div className="mt-4 flex justify-center items-center">
+                <div className="inline-block">
+                  <label className="block text-gray-700 font-semibold mb-2">
+                    Cambio:
+                  </label>
+                  <input
+                    type="number"
+                    value={vuelto}
+                    readOnly
+                    className="w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Campo de entrada para el Total Pagado */}
         </div>
       </div>
     </div>

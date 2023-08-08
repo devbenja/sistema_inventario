@@ -617,15 +617,6 @@ export const Ventas = () => {
                 Ver todas las ventas realizadas
               </Link>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Venta Detalles</h2>
-              <Link
-                to="/venta-detalles"
-                className="text-blue-500 hover:underline"
-              >
-                Ver detalles de ventas
-              </Link>
-            </div>
           </div>
           {/* Fin de la lista y enlaces */}
           <table className="App-auto w-full" id="table">
