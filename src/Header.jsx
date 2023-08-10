@@ -1,5 +1,16 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "./context/authContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUser,
+  faBuilding,
+  faUsers,
+  faGem,
+  faChartLine,
+  faShoppingCart,
+  faSignOutAlt,
+} from "@fortawesome/free-solid-svg-icons";
+
 //
 
 export const Header = () => {
@@ -27,27 +38,32 @@ export const Header = () => {
               to="/Create"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
-              👽 Usuarios
+              {" "}
+              <FontAwesomeIcon icon={faUser} className="mr-2" />
+              Usuarios
             </Link>
             <Link
               to="/Proveedores"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
-              👤 Proveedores
+              <FontAwesomeIcon icon={faBuilding} className="mr-2" />
+              Proveedores
             </Link>
             <Link
               to="/Clientes"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
-              👥 Clientes
+              <FontAwesomeIcon icon={faUsers} className="mr-2" />
+              Clientes
             </Link>
             <Link
               to="/Productos"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
-              💎 Productos
+              <FontAwesomeIcon icon={faGem} className="mr-2" />
+              Productos
             </Link>
-            <Link
+            {/* <Link
               to="/Ventas"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
@@ -58,7 +74,22 @@ export const Header = () => {
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
             >
               Compras
+            </Link> */}
+            <Link
+              to="/Ventas"
+              className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
+            >
+              <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+              Ventas
             </Link>
+            <Link
+              to="/Compras"
+              className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
+            >
+              <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
+              Compras
+            </Link>
+
             {/* </div> */}
             {/* <div className="md:flex items-center"> */}
             {user ? (
@@ -66,6 +97,7 @@ export const Header = () => {
                 onClick={handleLogout}
                 className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
               >
+                <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
                 Salir
               </button>
             ) : (
@@ -73,6 +105,8 @@ export const Header = () => {
                 to="/login"
                 className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
               >
+                {" "}
+                <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
                 Salir
               </Link>
             )}

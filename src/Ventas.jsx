@@ -28,7 +28,7 @@ export const Ventas = () => {
 
   const [precio, setPrecio] = useState("");
   useEffect(() => {
-    console.log("Productos en tabla actualizados:", productosEnTabla);
+    // console.log("Productos en tabla actualizados:", productosEnTabla);
   }, [productosEnTabla]);
 
   const handleNombreClienteChange = (event) => {
