@@ -245,23 +245,56 @@ export const Compras = () => {
           (producto) => producto.nombre === nombreProducto
         );
 
+        // if (productoExistente) {
+        //   // Si el producto ya existe en la tabla, actualizamos los datos
+        //   const nuevaCantidad =
+        //     parseInt(productoExistente.cantidad) + parseInt(cantidad);
+
+        //   const nuevoSubtotal = nuevaCantidad * precio;
+        //   const nuevoTotal =
+        //     nuevoSubtotal * (1 + iva / 100) * (1 - descuento / 100);
+
+        //   const productoActualizado = {
+        //     ...productoExistente,
+        //     cantidad: nuevaCantidad,
+        //     subtotal: nuevoSubtotal,
+        //     total: nuevoTotal,
+        //     nombreProveedor: nombreProveedor,
+        //     // totalPagado: totalPagado,
+        //     // vuelto: vuelto,
+        //   };
+
+        //   // Actualizar el producto existente en la lista
+        //   setProductosEnTabla((prevProductos) =>
+        //     prevProductos.map((producto) =>
+        //       producto.nombre === nombreProducto
+        //         ? productoActualizado
+        //         : producto
+        //     )
+        //   );
         if (productoExistente) {
-          // Si el producto ya existe en la tabla, actualizamos los datos
           const nuevaCantidad =
             parseInt(productoExistente.cantidad) + parseInt(cantidad);
 
           const nuevoSubtotal = nuevaCantidad * precio;
+
+          // Calculamos el nuevo IVA usando el nuevo subtotal
+          const nuevoIva = nuevoSubtotal * 0.15;
+
+          // Calculamos el nuevo total sumando el nuevo subtotal y el nuevo IVA,
+          // y aplicando el descuento si es necesario
           const nuevoTotal =
-            nuevoSubtotal * (1 + iva / 100) * (1 - descuento / 100);
+            nuevoSubtotal +
+            nuevoIva -
+            (nuevoSubtotal + nuevoIva) * (descuento / 100);
 
           const productoActualizado = {
             ...productoExistente,
             cantidad: nuevaCantidad,
             subtotal: nuevoSubtotal,
+            iva: nuevoIva, // Actualizamos el valor del IVA
             total: nuevoTotal,
             nombreProveedor: nombreProveedor,
-            // totalPagado: totalPagado,
-            // vuelto: vuelto,
           };
 
           // Actualizar el producto existente en la lista
