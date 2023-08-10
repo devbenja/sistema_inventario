@@ -245,33 +245,6 @@ export const Compras = () => {
           (producto) => producto.nombre === nombreProducto
         );
 
-        // if (productoExistente) {
-        //   // Si el producto ya existe en la tabla, actualizamos los datos
-        //   const nuevaCantidad =
-        //     parseInt(productoExistente.cantidad) + parseInt(cantidad);
-
-        //   const nuevoSubtotal = nuevaCantidad * precio;
-        //   const nuevoTotal =
-        //     nuevoSubtotal * (1 + iva / 100) * (1 - descuento / 100);
-
-        //   const productoActualizado = {
-        //     ...productoExistente,
-        //     cantidad: nuevaCantidad,
-        //     subtotal: nuevoSubtotal,
-        //     total: nuevoTotal,
-        //     nombreProveedor: nombreProveedor,
-        //     // totalPagado: totalPagado,
-        //     // vuelto: vuelto,
-        //   };
-
-        //   // Actualizar el producto existente en la lista
-        //   setProductosEnTabla((prevProductos) =>
-        //     prevProductos.map((producto) =>
-        //       producto.nombre === nombreProducto
-        //         ? productoActualizado
-        //         : producto
-        //     )
-        //   );
         if (productoExistente) {
           const nuevaCantidad =
             parseInt(productoExistente.cantidad) + parseInt(cantidad);
@@ -642,7 +615,7 @@ export const Compras = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-y-4">
+            <tbody>
               {productosEnTabla.map((producto, index) => (
                 <tr key={index}>
                   <td className="border px-4 py-2 text-center">

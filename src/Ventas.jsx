@@ -649,7 +649,7 @@ export const Ventas = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-y-4">
+            <tbody>
               {productosEnTabla.map((producto, index) => (
                 <tr key={index}>
                   <td className="border px-4 py-2 text-center">
